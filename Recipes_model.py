@@ -14,6 +14,7 @@ class RecipeBook:
 		self.cursor = self.mydb.cursor()
 		self.main_table = main_table
 		self.ref_table = referencing_table
+		# Key for this table is the recipe name, all recipe names must be unique
 		self.key = key
 
 	def get_table(self):
@@ -33,9 +34,9 @@ class RecipeBook:
 		                    % (self.main_table, recipe_name))
 		if (len(self.cursor.fetchall()) == 0):
 			print("The recipe could not be added")
-			return False
+			return -1
 
-		return True
+		return 0
 
 
 	# def add_to_ingredients(self, recipe_name, ingredients_str, split_pattern):
@@ -65,11 +66,11 @@ class RecipeBook:
 		                    % (self.key, self.main_table, self.key, recipe_name))
 		if(len(self.cursor.fetchall()) == 0):
 			print("That recipe is not in the database")
-			return False
+			return -1
 		self.cursor.execute("DELETE FROM %s WHERE %s = '%s' LIMIT 1" % (self.ref_table, self.key, recipe_name))
 		self.cursor.execute("DELETE FROM %s WHERE %s = '%s' LIMIT 1" % (self.main_table, self.key, recipe_name))
 		self.mydb.commit()
-		return True
+		return 0
 
 	def edit_recipe(self, current_name, new_name, new_ingr, new_instr, new_cat,
 						new_meal, new_time, new_dif, new_price, new_ethn):
@@ -77,8 +78,8 @@ class RecipeBook:
 			self.cursor.execute("SELECT %s FROM %s WHERE %s = '%s';"
 			                    % (self.key, self.main_table, self.key, new_name))
 			if len(self.cursor.fetchall()) != 0:
-				print("Your new recipe name must be unique")
-				return False
+				print("Your new recipe name must not match any existing recipes")
+				return -1
 
 		sql = "UPDATE %s SET recipe_name = '%s', ingredients = '%s', instructions = '%s', category = '%s', " \
 		      "meal = '%s', prep_time = '%s', difficulty = '%s', price = '%s', ethnicity = '%s' WHERE %s = '%s'"
@@ -87,10 +88,29 @@ class RecipeBook:
 		self.cursor.execute(sql % vals)
 
 		self.mydb.commit()
-		return True
+		return 0
 
+	def split_ing(self, recipe_name):
+		ing_list = []
+		self.cursor.execute("SELECT ingredients FROM %s WHERE %s = '%s';"
+		                    % (self.main_table, self.key, recipe_name))
+		fetch_list = self.cursor.fetchall()
+		if len(fetch_list) == 0:
+			print("That recipe is not in the database")
+			return ing_list
+		ing_str = fetch_list[0][0]
+		split_list = ing_str.split('\n')
+		for item in split_list:
+			ing_list.append(item.strip())
+		return ing_list
+
+
+	#def filter_by_ing(self, ing_list):
+
+
+	#Purpose: return a list of all recipes matching given parameters (e.g. all recipes tagged as indian, cheap
 	def filter_recipes(self, column_list, value_list):
-		val_iter= iter(value_list)
+		val_iter = iter(value_list)
 		final_recipe_list = []
 		list_instantiated = False
 
@@ -117,15 +137,19 @@ class RecipeBook:
 		return final_recipe_list
 
 
+
 model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
 #model.add_recipe("Tiramisu1", "cream \n milk", "test3", "cat", "meal", "time", "dif", "price", "ethn")
 #model.delete_recipe("Tiramisu1")
 #model.edit_recipe("filterTest2", "newName", "2", "3", "4", "5", "6", "7", "8", "9")
-#col = ["ingredients", "category"]
-#val = ["ing", 'cat']
-#print(model.filter_recipes(col, val))
-#for row in model.get_table():
-#	print(row)
+list = model.split_ing("Tiramisu")
+print(list)
+col = ["ingredients", "category"]
+ing = [""]
+val = ['ing', 'cat']
+print(model.filter_recipes(col, val))
+for row in model.get_table():
+	print(row)
 
 
 	## FIX ME: add error checking for add/delete, have an if that can return false
