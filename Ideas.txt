@@ -1,7 +1,2 @@
-> For filter_recipes, include some way so that if you're searching multiple columns, you only search the values
-  appropriate for that column in that column
-    e.g. searching cost and ethnicity for $, $$, mexican, and indian, you would only search cost for $, $$ and only
-    ethnicity for mexican and indian
-  - maybe pass in a col list and val list, and the val list is a list of lists, each internal list matching the
-    index of the column it's in in col_list
->
+> Include an automatic way to create a recipe database with simple password and username
+> Include a way to install/check if installed python and mySQL
