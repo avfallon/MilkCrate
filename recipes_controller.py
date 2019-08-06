@@ -1,5 +1,6 @@
 class Controller:
 
+
 	def open_new_recipe_page(self):
 		pass
 		# Gets all columns that must be filled from the Model

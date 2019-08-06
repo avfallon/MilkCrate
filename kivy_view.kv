@@ -1,49 +1,31 @@
 #: import view python_view
+#: import model model_w_recipe
 #: import controller recipes_controller
 #: import ListAdapter kivy.adapters.listadapter.ListAdapter
 #: import ListItemButton kivy.uix.listview.ListItemButton
 
-<Controller>
-    #lbl: button_status
+
+# RecycleView stuff
 
 
-    AnchorLayout:
-        size: 300, 300
-        anchor_x: "left"
-        anchor_y: "top"
-        padding: 50, 40, 100, 40
-
-        TextInput:
-            multiline: False
-            hint_text: "Search"
-            anchor_x: "left"
-            anchor_y: "top"
-            size_hint: .9, None
-            height: 20
-            width: 400
-
-        Label:
-            id: button_status
-            text: "label"
-            size_hint: .5, .1
-            #pos_hint: {"x": .2, "y": .9}
-            color: 2, 188, 100, 1
-            background_color: .1, .2, .3, 1
-            background_normal: ''
-            #pos_hint: {"x": 1, "y": 0}
-            #size_hint: .1, .1
-        Button:
-            text: "Search"
-            #pos_hint: {"x": .8, "y": .9}
-            size_hint: None, None
-            width: 80
-            height: 30
-            on_press: root.print_table()
 
 
-<CustListBut@ListItemButton>
-    size_hint: None, None
-    size: 30, 30
+
+
+
+<MyScreenManager>
+    HomeScreen:
+        name: "home"
+    RecipeViewScreen:
+        name: "recipeView"
+
+
+<RecycleViewRow>:
+    orientation: 'horizontal'
+    Button:
+        text: root.text
+        on_press: root.go_to_rec(root.text)
+
 
 <HomeScreen>
     BoxLayout:
@@ -53,15 +35,22 @@
         padding: 10
         spacing: 10
 
-        recipe_list: all_recipes_listview
+        Button:
+            text: "populate list"
+            on_press: root.populate_recipe_list("", "")
 
         Button:
             text: "Recipe Home"
-            size_hint: .1, .1
+            size_hint: None, None
+            size: 200, 400
             pos_hint: {"top": 1}
+            on_press: root.manager.current = 'recipeView'
+
 
         BoxLayout:
             orientation: "vertical"
+            size_hint: 1, None
+            height: 200
 
             Label:
                 text: "     All Recipes"
@@ -70,11 +59,19 @@
                 size: self.texture_size
                 pos_hint: {"top": 1}
 
-            ListView:
-                id: all_recipes_listview
-                ident: "recipe"
-                adapter:
-                    ListAdapter(data=["recipes"], cls=view.RecipeListButton)
+
+            #ScrollView:
+             #   id: recipe_screen_scrlv
+
+             #   RecycleView
+              #      viewclass: 'RecycleViewRow'
+
+            RecycleBoxLayout:
+                default_size: None, dp(56)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'
 
 
 
@@ -101,6 +98,7 @@
                     text: "Recipe Home"
                     size_hint: .1, .1
                     pos_hint: {"top": 1}
+                    on_press: root.manager.current = 'home'
 
                 GridLayout:
                     rows: 3
@@ -227,54 +225,4 @@
                             size: self.texture_size
                             halign: "left"
                             markup: True
-
-
-<asd>
-
-    GridLayout
-        cols: 1
-        size_hint: 1,None
-        height: self.minimum_height
-        size_hint_y: .3
-
-
-        Label
-            text: "[b]Ingredients:[/b]\n"
-            size_hint: (None, None)
-            size: self.texture_size
-            halign: "left"
-            markup: True
-
-        Label:
-            text: "Beans\nGreeens\nTomatoes\nPotatoes\nwheat\nmilk\na\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nm\nn\no\np"
-            size_hint: None, None
-            size: self.texture_size
-            halign: "left"
-            valign: "top"
-            markup: True
-
-    ScrollView
-        id: InstrScrlv
-        size_hint: 1, 1
-
-        GridLayout
-            cols: 1
-            size_hint: 1,None
-            height: self.minimum_height
-
-            Label
-                text: "[b]Instructions:[/b]\n"
-                size_hint: (None, None)
-                size: self.texture_size
-                halign: "left"
-                valign: "top"
-                markup: True
-
-
-            Label:
-                text: "1) Boil water\n2) Let it cool"
-                size_hint: None, None
-                size: self.texture_size
-                halign: "left"
-                markup: True
 
