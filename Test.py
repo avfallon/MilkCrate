@@ -1,78 +1,127 @@
 from kivy.app import App
 from kivy.lang import Builder
-from kivy.properties import StringProperty
-from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import BooleanProperty
+from kivy.properties import NumericProperty
+from kivy.uix.behaviors import FocusBehavior
+from kivy.uix.label import Label
+from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview import RecycleView
-from kivy.uix.popup import Popup
+from kivy.uix.recycleview.layout import LayoutSelectionBehavior
+from kivy.uix.recycleview.views import RecycleDataViewBehavior
+from kivy.uix.screenmanager import ScreenManager, Screen
 
 Builder.load_string('''
-#:kivy 1.10.0
-#: import Popup kivy.uix.popup
+#:import random random.random
 
-<MessageBox>:
-    title: 'Popup Message Box'
-    size_hint: None, None
-    size: 400, 400
+<CustomScreen>:
+    hue: random()
+    canvas:
+        Color:
+            hsv: self.hue, .5, .3
+        Rectangle:
+            size: self.size
 
-    BoxLayout:
-        orientation: 'vertical'
-        Label:
-            text: root.message
-        Button:
-            size_hint: 1, 0.2
-            text: 'OK'
-            on_press: root.dismiss()
+    Label:
+        font_size: 42
+        text: root.name
 
-<RecycleViewRow>:
-    orientation: 'horizontal'
     Button:
-        text: root.text
-        on_press: app.root.message_box(root.text)
+        text: 'Next screen'
+        size_hint: None, None
+        pos_hint: {'right': 1}
+        size: 150, 50
+        on_release: root.manager.current = root.manager.next()
 
-<MainScreen>:
-    viewclass: 'RecycleViewRow'
-    RecycleBoxLayout:
+<SelectableLabel>:
+    # Draw a background to indicate selection
+    canvas.before:
+        Color:
+            rgba: (.0, 0.9, .1, .3) if self.selected else (0, 0, 0, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+<RV>:
+    viewclass: 'SelectableLabel'
+    SelectableRecycleBoxLayout:
         default_size: None, dp(56)
         default_size_hint: 1, None
         size_hint_y: None
         height: self.minimum_height
-        orientation: 'vertical'                    
-                    ''')
+        orientation: 'vertical'
+        multiselect: True
+        touch_multiselect: True
 
-from model_w_recipe import *
-model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
+<RVScreen>:
+    BoxLayout:
+        orientation: "vertical"
+        RV:
+        Button:
+            text: 'Previous screen'
+            size_hint: None, None
+            size: 150, 50
+            on_release: root.manager.current = root.manager.previous()
+
+''')
 
 
-class MessageBox(Popup):
-    message = StringProperty()
+class CustomScreen(Screen):
+    hue = NumericProperty(0)
 
 
-class RecycleViewRow(BoxLayout):
-    text = StringProperty()
+class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior,
+                                 RecycleBoxLayout):
+    ''' Adds selection and focus behaviour to the view. '''
 
 
-class MainScreen(RecycleView):
+class SelectableLabel(RecycleDataViewBehavior, Label):
+    ''' Add selection support to the Label '''
+    index = None
+    selected = BooleanProperty(False)
+    selectable = BooleanProperty(True)
+
+    def refresh_view_attrs(self, rv, index, data):
+        ''' Catch and handle the view changes '''
+        self.index = index
+        return super(SelectableLabel, self).refresh_view_attrs(
+            rv, index, data)
+
+    def on_touch_down(self, touch):
+        ''' Add selection on touch down '''
+        if super(SelectableLabel, self).on_touch_down(touch):
+            return True
+        if self.collide_point(*touch.pos) and self.selectable:
+            return self.parent.select_with_touch(self.index, touch)
+
+    def apply_selection(self, rv, index, is_selected):
+        ''' Respond to the selection of items in the view. '''
+        self.selected = is_selected
+        if is_selected:
+            print("selection changed to {0}".format(rv.data[index]))
+        else:
+            print("selection removed for {0}".format(rv.data[index]))
+
+
+class RV(RecycleView):
     def __init__(self, **kwargs):
-        super(MainScreen, self).__init__(**kwargs)
-        rec_list = self.build_recipe_list("", "")
-        self.data = [{'text': recipe, 'id': recipe} for recipe in rec_list]
-
-    def build_recipe_list(self, category, value):
-        search_dictionary = {value: category}
-        return model.filter_recipes(search_dictionary)
+        super(RV, self).__init__(**kwargs)
+        self.data = [{'text': str(x)} for x in range(10)]
 
 
-    def message_box(self, message):
-        p = MessageBox()
-        p.message = message
-        p.open()
-        print('test press: ', message)
+class RVScreen(Screen):
+    pass
 
-class TestApp(App):
-    title = "RecycleView Direct Test"
+
+class ScreenManagerApp(App):
 
     def build(self):
-        return MainScreen()
+        root = ScreenManager()
+        root.add_widget(CustomScreen(name='CustomScreen'))
+        root.add_widget(RVScreen(name='RVScreen'))
+        return root
 
 
-TestApp().run()
+if __name__ == '__main__':
+    ScreenManagerApp().run()
+    hue = NumericProperty(0)
+
+

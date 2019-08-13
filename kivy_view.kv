@@ -8,11 +8,6 @@
 # RecycleView stuff
 
 
-
-
-
-
-
 <MyScreenManager>
     HomeScreen:
         name: "home"
@@ -20,11 +15,30 @@
         name: "recipeView"
 
 
-<RecycleViewRow>:
-    orientation: 'horizontal'
-    Button:
-        text: root.text
-        on_press: root.go_to_rec(root.text)
+#<RecycleViewRow>:
+#    orientation: 'horizontal'
+#    Button:
+#        text: root.text
+#        on_press: root.go_to_rec(root.text)
+
+<RV>:
+    viewclass: 'SelectableLabel'
+    SelectableRecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: 'vertical'
+
+
+<SelectableLabel>:
+    # Draw a background to indicate selection
+    canvas.before:
+        Color:
+            rgba: (.0, 0.9, .1, .3) if self.selected else (0, 0, 0, 1)
+        Rectangle:
+            pos: self.pos
+            size: self.size
 
 
 <HomeScreen>
@@ -34,6 +48,13 @@
         #height: 800
         padding: 10
         spacing: 10
+
+        Button:
+            text: '<-'
+            size_hint: None, None
+            size: 150, 50
+            pos_hint: {"y": .9}
+            on_release: root.manager.current = root.manager.previous()
 
         Button:
             text: "populate list"
@@ -49,15 +70,16 @@
 
         BoxLayout:
             orientation: "vertical"
-            size_hint: 1, None
-            height: 200
 
-            Label:
-                text: "     All Recipes"
-                font_size: 30
-                size_hint: None, None
-                size: self.texture_size
-                pos_hint: {"top": 1}
+            RV:
+
+
+        Label:
+            text: "     All Recipes"
+            font_size: 30
+            size_hint: None, None
+            size: self.texture_size
+            pos_hint: {"top": 1}
 
 
             #ScrollView:

@@ -1,0 +1,36 @@
+#:kivy 1.10.0
+
+<MessageBox>:
+    title: 'Popup Message Box'
+    size_hint: None, None
+    size: 400, 400
+
+    BoxLayout:
+        orientation: 'vertical'
+        Label:
+            text: app.root.rv_layout.selected_value
+        Button:
+            size_hint: 1, 0.2
+            text: 'OK'
+            on_press:
+                root.dismiss()
+
+<SelectableButton>:
+    # Draw a background to indicate selection
+    canvas.before:
+        Color:
+            rgba: (0.0, 0.9, 0.1, 0.3)
+        Rectangle:
+            pos: self.pos
+            size: self.size
+
+<RV>:
+    rv_layout: layout
+    viewclass: 'SelectableButton'
+    SelectableRecycleBoxLayout:
+        id: layout
+        default_size: None, dp(56)
+        default_size_hint: 0.1, None
+        size_hint_y: None
+        height: self.minimum_height
+        orientation: "vertical"
