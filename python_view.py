@@ -124,14 +124,14 @@ class MyScreenManager(ScreenManager):
 	pass
 
 
-class kivy_viewApp(App):
+class testApp(App):
 	def build(self):
-		screen_manager = MyScreenManager()
-		return screen_manager
+		return MyScreenManager()
+
 		#return RecipeViewScreen()
 		#return HomeScreen()
 
 
 
-
-kivy_viewApp().run()
+print("HI")
+testApp().run()

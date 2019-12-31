@@ -1,3 +1,6 @@
+
+
+
 class Controller:
 
 
@@ -15,8 +18,10 @@ class Controller:
 		# updates model with arguments
 		# This function ends, but the view function that calls it will then open that new recipe's page
 
-	def open_recipe_page(self, recipe_name):
-		pass
+	def open_recipe_page(self, input_dict):
+		recipe_name = input_dict["text"]
+		print("Opening recipe", recipe_name)
+		#screen_manager.manager.current = 'recipeView'
 		# accesses information from model for that recipe
 		# calls view function to open recipe page w/ that info
 

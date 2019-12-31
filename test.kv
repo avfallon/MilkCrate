@@ -1,36 +1,249 @@
-#:kivy 1.10.0
+#: import view Test
+#: import model model_w_recipe
+#: import controller recipes_controller
+#: import ListAdapter kivy.adapters.listadapter.ListAdapter
+#: import ListItemButton kivy.uix.listview.ListItemButton
 
-<MessageBox>:
-    title: 'Popup Message Box'
-    size_hint: None, None
-    size: 400, 400
 
-    BoxLayout:
+# RecycleView stuff
+
+
+<MyScreenManager>
+    HomeScreen:
+        name: "home"
+    RecipeViewScreen:
+        name: "recipeView"
+
+
+#<RecycleViewRow>:
+#    orientation: 'horizontal'
+#    Button:
+#        text: root.text
+#        on_press: root.go_to_rec(root.text)
+
+<RV>:
+    viewclass: 'SelectableLabel'
+    SelectableRecycleBoxLayout:
+        default_size: None, dp(56)
+        default_size_hint: 1, None
+        size_hint_y: None
+        height: self.minimum_height
         orientation: 'vertical'
-        Label:
-            text: app.root.rv_layout.selected_value
-        Button:
-            size_hint: 1, 0.2
-            text: 'OK'
-            on_press:
-                root.dismiss()
 
-<SelectableButton>:
+
+<SelectableLabel>:
     # Draw a background to indicate selection
     canvas.before:
         Color:
-            rgba: (0.0, 0.9, 0.1, 0.3)
+            rgba: (.0, 0.9, .1, .3) if self.selected else (0, 0, 0, 1)
         Rectangle:
             pos: self.pos
             size: self.size
 
-<RV>:
-    rv_layout: layout
-    viewclass: 'SelectableButton'
-    SelectableRecycleBoxLayout:
-        id: layout
-        default_size: None, dp(56)
-        default_size_hint: 0.1, None
-        size_hint_y: None
-        height: self.minimum_height
-        orientation: "vertical"
+
+<HomeScreen>
+    BoxLayout:
+        orientation: "horizontal"
+        #size_hint: 1, None
+        #height: 800
+        padding: 10
+        spacing: 10
+
+        Button:
+            text: '<-'
+            size_hint: None, None
+            size: 150, 50
+            pos_hint: {"y": .9}
+            on_release: root.manager.current = root.manager.previous()
+
+        Button:
+            text: "populate list"
+            on_press: root.populate_recipe_list("", "")
+
+        Button:
+            text: "Recipe Home"
+            size_hint: None, None
+            size: 200, 400
+            pos_hint: {"top": 1}
+            on_press: root.manager.current = 'recipeView'
+
+
+        BoxLayout:
+            orientation: "vertical"
+
+            Label:
+                text: "     All Recipes Test"
+                font_size: 30
+                size_hint: None, None
+                size: self.texture_size
+                pos_hint: {"top": 1}
+
+            RV:
+
+
+            #ScrollView:
+             #   id: recipe_screen_scrlv
+
+             #   RecycleView
+              #      viewclass: 'RecycleViewRow'
+
+            RecycleBoxLayout:
+                default_size: None, dp(56)
+                default_size_hint: 1, None
+                size_hint_y: None
+                height: self.minimum_height
+                orientation: 'vertical'
+
+
+
+
+<CategoryTagLabel@Label>
+    size_hint: None, None
+    size: self.texture_size
+    pos_hint: {"top": 1}
+
+
+<RecipeViewScreen>
+    BoxLayout:
+
+        ScrollView:
+            id: recipe_screen_scrlv
+
+            BoxLayout:
+                orientation: "horizontal"
+                size_hint: 1, None
+                height: 800
+                padding: 10
+
+                Button:
+                    text: "Recipe Home"
+                    size_hint: .1, .1
+                    pos_hint: {"top": 1}
+                    on_press: root.manager.current = 'home'
+
+                GridLayout:
+                    rows: 3
+                    padding: 10
+                    spacing: 10
+                    size_hint: .9, None
+                    height: 800
+
+                    BoxLayout:
+                        orientation: "horizontal"
+                        spacing: 10
+                        padding: 10
+                        size_hint: 1, None
+                        height: 30
+
+                        Button:
+                            text: "Edit Recipe"
+                            pos_hint: {"top": 1}
+                            size_hint: None, None
+                            width: 85
+                            height: 30
+
+                        Label:
+                            text: "Recipe Name"
+                            font_size: 21
+                            size_hint: None, None
+                            size: self.texture_size
+                            pos_hint: {"top": 1}
+
+
+                    BoxLayout:
+                        orientation: "horizontal"
+                        size_hint: 1, None
+                        height: 128
+                        pos_hint: {"y": 1}
+                        spacing: 10
+                        padding: 10
+
+                        Button:
+                            text: "Recipe\nPicture"
+                            markup: "true"
+                            size_hint: None, None
+                            size: 85, 85
+                            pos_hint: {"top": 1}
+
+                        BoxLayout:
+                            pos_hint: {"top": 1}
+                            orientation: "vertical"
+                            size_hint: None, None
+                            size: 200, 128
+                            padding: 5
+                            spacing: 2
+                            size_hint_x: .5
+                            canvas:
+                                Color:
+                                    rgba: 150/255, 150/255, 150/255, 1
+                                Rectangle:
+                                    pos: self.pos
+                                    size: self.size
+
+                            CategoryTagLabel:
+                                text: "Category: "
+                            CategoryTagLabel:
+                                text: "Meal: "
+                            CategoryTagLabel:
+                                text: "Prep Time: "
+                            CategoryTagLabel:
+                                text: "Difficulty: "
+                            CategoryTagLabel:
+                                text: "Price: "
+                            CategoryTagLabel:
+                                text: "Ethnicity: "
+
+                    #BoxLayout:
+                        #pos_hint: {"y": 0}
+                    #    orientation: "vertical"
+                    #    spacing: 10
+
+                    #GridLayout:
+                    #    rows: 2
+                    #    size_hint: 1, None
+                        #height: self.minimum_height
+
+                    BoxLayout
+                        orientation: "vertical"
+                        pos_hint: {"y": 1}
+                        id: "ing_ins"
+                        padding: 10
+
+
+                        Label
+                            text: "[b]Ingredients:[/b]\n"
+                            size_hint: (None, None)
+                            size: self.texture_size
+                            halign: "left"
+                            markup: True
+
+                        Label:
+                            text: "Beans\nGreeens\nTomatoes\nPotatoes\nwheat\nmilk\na\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nm\nn\no\np"
+                            size_hint: None, None
+                            size: self.texture_size
+                            halign: "left"
+                            valign: "top"
+                            markup: True
+
+                    #GridLayout
+
+                        #rows: 2
+                        #size_hint: 1,None
+                        #height: self.minimum_height
+
+                        Label
+                            text: "[b]Instructions:[/b]\n"
+                            size_hint: (None, None)
+                            size: self.texture_size
+                            halign: "left"
+                            valign: "top"
+                            markup: True
+
+
+                        Label:
+                            text: "1) Boil water\n2) Let it cool"
+                            size_hint: None, None
+                            size: self.texture_size
+                            halign: "left"
+                            markup: True
+

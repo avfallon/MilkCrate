@@ -1,4 +1,10 @@
 from kivy.app import App
+# from kivy.uix.boxlayout import BoxLayout
+from kivy.properties import ObjectProperty
+from kivy.uix.screenmanager import ScreenManager, Screen
+
+# RecycleView stuff
+from kivy.app import App
 from kivy.lang import Builder
 from kivy.properties import BooleanProperty
 from kivy.properties import NumericProperty
@@ -8,61 +14,16 @@ from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
-from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.properties import ListProperty, StringProperty, ObjectProperty
 
-Builder.load_string('''
-#:import random random.random
 
-<CustomScreen>:
-    hue: random()
-    canvas:
-        Color:
-            hsv: self.hue, .5, .3
-        Rectangle:
-            size: self.size
+from recipes_controller import *
+controller = Controller()
+from model_w_recipe import *
+model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
 
-    Label:
-        font_size: 42
-        text: root.name
 
-    Button:
-        text: 'Next screen'
-        size_hint: None, None
-        pos_hint: {'right': 1}
-        size: 150, 50
-        on_release: root.manager.current = root.manager.next()
-
-<SelectableLabel>:
-    # Draw a background to indicate selection
-    canvas.before:
-        Color:
-            rgba: (.0, 0.9, .1, .3) if self.selected else (0, 0, 0, 1)
-        Rectangle:
-            pos: self.pos
-            size: self.size
-<RV>:
-    viewclass: 'SelectableLabel'
-    SelectableRecycleBoxLayout:
-        default_size: None, dp(56)
-        default_size_hint: 1, None
-        size_hint_y: None
-        height: self.minimum_height
-        orientation: 'vertical'
-        multiselect: True
-        touch_multiselect: True
-
-<RVScreen>:
-    BoxLayout:
-        orientation: "vertical"
-        RV:
-        Button:
-            text: 'Previous screen'
-            size_hint: None, None
-            size: 150, 50
-            on_release: root.manager.current = root.manager.previous()
-
-''')
-
+# RecycleView stuff
 
 class CustomScreen(Screen):
     hue = NumericProperty(0)
@@ -79,11 +40,13 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     selected = BooleanProperty(False)
     selectable = BooleanProperty(True)
 
+    """ Add selection support to the Label """
+    index = None
+
     def refresh_view_attrs(self, rv, index, data):
-        ''' Catch and handle the view changes '''
+        """ Catch and handle the view changes """
         self.index = index
-        return super(SelectableLabel, self).refresh_view_attrs(
-            rv, index, data)
+        return super(SelectableLabel, self).refresh_view_attrs(rv, index, data)
 
     def on_touch_down(self, touch):
         ''' Add selection on touch down '''
@@ -92,19 +55,33 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         if self.collide_point(*touch.pos) and self.selectable:
             return self.parent.select_with_touch(self.index, touch)
 
+
+#    def on_press(self):
+#        self.selected = True
+
+
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
         if is_selected:
-            print("selection changed to {0}".format(rv.data[index]))
+	        controller.open_recipe_page(rv.data[index])
+            #print("selection changed to {0}".format(rv.data[index]))
         else:
             print("selection removed for {0}".format(rv.data[index]))
+
+
+    def on_release(self, rv, index, is_selected):
+        print(rv.data[index])
+
+
+			#print("HELLO selection changed to {0}".format(rv.data[index]))
+
 
 
 class RV(RecycleView):
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        self.data = [{'text': str(x)} for x in range(10)]
+        self.data = [{'text': recipe_name} for recipe_name in model.recipe_dict]
 
 
 class RVScreen(Screen):
@@ -120,8 +97,43 @@ class ScreenManagerApp(App):
         return root
 
 
-if __name__ == '__main__':
-    ScreenManagerApp().run()
-    hue = NumericProperty(0)
 
 
+
+
+
+class HomeScreen(Screen):
+	recipe_list = ObjectProperty()
+
+	def tester(self):
+		print("Test complete")
+
+	def populate_recipe_list(self, category, value):
+		search_dictionary = {value: category}
+		name_list = model.filter_recipes(search_dictionary)
+		for recipe in name_list:
+			self.recipe_list.adapter.data.extend([recipe])
+		self.recipe_list._trigger_reset_populate()
+
+	pass
+
+
+class RecipeViewScreen(Screen):
+	pass
+
+
+class MyScreenManager(ScreenManager):
+	pass
+
+
+class testApp(App):
+	def build(self):
+		screen_manager = MyScreenManager()
+		return screen_manager
+		#return RecipeViewScreen()
+		#return HomeScreen()
+
+
+
+print("POOP")
+testApp().run()

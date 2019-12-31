@@ -185,12 +185,12 @@ class RecipeBook:
 
 
 model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
-for item in model.get_table():
-	print(item)
-dict = {
-	"cream": "ingredients"
-}
-list = model.filter_recipes(dict).copy()
-print("Final List:")
-for item in list:
-	print(item)
+#for item in model.get_table():
+	#print(item)
+#dict = {
+# 	"cream": "ingredients"
+# }
+# list = model.filter_recipes(dict).copy()
+#print("Final List:")
+#for item in list:
+	#print(item)
