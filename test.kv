@@ -25,7 +25,8 @@
     viewclass: 'SelectableLabel'
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
-        default_size_hint: 1, None
+        #This can be used to center the text in the available space
+        #default_size_hint: 1, None
         size_hint_y: None
         height: self.minimum_height
         orientation: 'vertical'
@@ -40,33 +41,53 @@
             pos: self.pos
             size: self.size
 
+<CustomDropDown>:
+    Button:
+        text: 'My first Item'
+        size_hint_y: None
+        height: 44
+        on_release: root.select('item1')
+    Label:
+        text: 'Unselectable item'
+        size_hint_y: None
+        height: 44
+    Button:
+        text: 'My second Item'
+        size_hint_y: None
+        height: 44
+        on_release: root.select('item2')
 
 <HomeScreen>
     BoxLayout:
         orientation: "horizontal"
-        #size_hint: 1, None
-        #height: 800
         padding: 10
         spacing: 10
 
-        Button:
-            text: '<-'
-            size_hint: None, None
-            size: 150, 50
-            pos_hint: {"y": .9}
-            on_release: root.manager.current = root.manager.previous()
+        BoxLayout:
+            orientation: "vertical"
+            padding: 10
+            spacing: 10
 
-        Button:
-            text: "populate list"
-            on_press: root.populate_recipe_list("", "")
 
-        Button:
-            text: "Recipe Home"
-            size_hint: None, None
-            size: 200, 400
-            pos_hint: {"top": 1}
-            on_press: root.manager.current = 'recipeView'
+            Button:
+                text: "Recipe Home"
+                size_hint: None, None
+                size: 200, 400
+                pos_hint: {"top": 1}
+                on_press: root.manager.current = 'recipeView'
 
+            BoxLayout:
+                orientation: "vertical"
+                canvas:
+                    Color:
+                        rgba: 150/255, 150/255, 150/255, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+                SelectableLabel:
+                    text: "Category"
+                SelectableLabel:
+                    text: "Ethnicity"
 
         BoxLayout:
             orientation: "vertical"
@@ -205,7 +226,7 @@
 
                     BoxLayout
                         orientation: "vertical"
-                        pos_hint: {"y": 1}
+                        #pos_hint: {"y": 1}
                         id: "ing_ins"
                         padding: 10
 

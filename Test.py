@@ -15,6 +15,8 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
+from kivy.uix.dropdown import DropDown
+
 
 
 from recipes_controller import *
@@ -96,7 +98,8 @@ class ScreenManagerApp(App):
         root.add_widget(RVScreen(name='RVScreen'))
         return root
 
-
+class CustomDropDown(DropDown):
+    pass
 
 
 
