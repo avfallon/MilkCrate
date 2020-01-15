@@ -41,21 +41,6 @@
             pos: self.pos
             size: self.size
 
-<CustomDropDown>:
-    Button:
-        text: 'My first Item'
-        size_hint_y: None
-        height: 44
-        on_release: root.select('item1')
-    Label:
-        text: 'Unselectable item'
-        size_hint_y: None
-        height: 44
-    Button:
-        text: 'My second Item'
-        size_hint_y: None
-        height: 44
-        on_release: root.select('item2')
 
 <HomeScreen>
     BoxLayout:
@@ -63,31 +48,35 @@
         padding: 10
         spacing: 10
 
-        BoxLayout:
-            orientation: "vertical"
-            padding: 10
-            spacing: 10
+#        BoxLayout:
+#            orientation: "vertical"
+#            padding: 10
+#            spacing: 10
 
+        FloatLayout:
+            size_hint: None, None
+            size: 200, 500
+            pos_hint: {"x": 0, "top": 1}
 
             Button:
                 text: "Recipe Home"
                 size_hint: None, None
-                size: 200, 400
-                pos_hint: {"top": 1}
+                size: 100, 50
+                pos_hint: { "x": 0, "top": 1}
                 on_press: root.manager.current = 'recipeView'
 
             BoxLayout:
                 orientation: "vertical"
+                size_hint: None, None
+                size: 200, 400
+                pos_hint: {"x": 0, "top": .88}
+
                 canvas:
                     Color:
                         rgba: 150/255, 150/255, 150/255, 1
                     Rectangle:
                         pos: self.pos
                         size: self.size
-                SelectableLabel:
-                    text: "Category"
-                SelectableLabel:
-                    text: "Ethnicity"
 
         BoxLayout:
             orientation: "vertical"
