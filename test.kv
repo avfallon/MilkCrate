@@ -44,9 +44,7 @@
 
 <HomeScreen>
     BoxLayout:
-        orientation: "horizontal"
         padding: 10
-        spacing: 10
 
         FloatLayout:
             size_hint: None, None
@@ -59,7 +57,7 @@
                 size_hint: None, None
                 size: 40, 40
                 pos_hint: { "x": 0, "top": 1}
-                on_press: root.manager.current = 'recipeView'
+                on_press: root.manager.current = root.manager.previous()
 
             Button:
                 text: ">"
@@ -67,7 +65,7 @@
                 size_hint: None, None
                 size: 40, 40
                 pos_hint: { "x": .04, "top": 1}
-                on_press: root.manager.current = 'recipeView'
+                on_press: root.manager.current = root.manager.previous()
 
             Button:
                 text: "Recipe Home"
@@ -103,9 +101,6 @@
                         pos: self.pos
                         size: self.size
 
-        #BoxLayout:
-         #   orientation: "vertical"
-
             Label:
                 text: "All Recipes"
                 font_size: 30
@@ -128,145 +123,187 @@
 
 <RecipeViewScreen>
     BoxLayout:
+        padding: 10
 
-        ScrollView:
-            id: recipe_screen_scrlv
+        FloatLayout:
+            size_hint: None, None
+            size: 1000, 500
+            pos_hint: {"x": 0, "top": 1}
+
+            Button:
+                text: "<"
+                font_size: "25sp"
+                size_hint: None, None
+                size: 40, 40
+                pos_hint: { "x": 0, "top": 1}
+                on_press: root.manager.current = root.manager.previous()
+
+            Button:
+                text: ">"
+                font_size: "25sp"
+                size_hint: None, None
+                size: 40, 40
+                pos_hint: { "x": .04, "top": 1}
+                on_press: root.manager.current = root.manager.previous()
+
+            Button:
+                text: "Recipe Home"
+                size_hint: None, None
+                size: 100, 40
+                pos_hint: { "x": .09, "top": 1}
+                on_press: root.manager.current = 'recipeView'
+
+            TextInput:
+                hint_text: "Search"
+                multiline: "false"
+                size_hint: None, None
+                size: 450, 30
+                pos_hint: {"x": .2, "top": .99}
+
+            Button:
+                text: "Search"
+                size_hint: None, None
+                size: 90, 40
+                pos_hint: {"x": .655, "top": 1}
+
 
             BoxLayout:
-                orientation: "horizontal"
-                size_hint: 1, None
-                height: 800
+                orientation: "vertical"
+                size_hint: None, None
+                size: 189, 400
+                pos_hint: {"x": 0, "top": .9}
+
+                canvas:
+                    Color:
+                        rgba: 150/255, 150/255, 150/255, 1
+                    Rectangle:
+                        pos: self.pos
+                        size: self.size
+
+            GridLayout:
+                rows: 3
                 padding: 10
+                spacing: 10
+                size_hint: .9, None
+                height: 800
+                pos_hint: {"x": .2, "top": .88}
 
-                Button:
-                    text: "<-"
-                    size_hint: .1, .1
-                    pos_hint: {"top": 1}
-                    on_press: root.manager.current = root.manager.previous()
-
-                GridLayout:
-                    rows: 3
-                    padding: 10
+                BoxLayout:
+                    orientation: "horizontal"
                     spacing: 10
-                    size_hint: .9, None
-                    height: 800
+                    padding: 10
+                    size_hint: 1, None
+                    height: 30
 
-                    BoxLayout:
-                        orientation: "horizontal"
-                        spacing: 10
-                        padding: 10
-                        size_hint: 1, None
+                    Button:
+                        text: "Edit Recipe"
+                        pos_hint: {"top": 1}
+                        size_hint: None, None
+                        width: 85
                         height: 30
 
-                        Button:
-                            text: "Edit Recipe"
-                            pos_hint: {"top": 1}
-                            size_hint: None, None
-                            width: 85
-                            height: 30
+                    Label:
+                        text: "Recipe Name"
+                        font_size: 21
+                        size_hint: None, None
+                        size: self.texture_size
+                        pos_hint: {"top": 1}
 
-                        Label:
-                            text: "Recipe Name"
-                            font_size: 21
-                            size_hint: None, None
-                            size: self.texture_size
-                            pos_hint: {"top": 1}
 
+                BoxLayout:
+                    orientation: "horizontal"
+                    size_hint: 1, None
+                    height: 128
+                    pos_hint: {"y": 1}
+                    spacing: 10
+                    padding: 10
+
+                    Button:
+                        text: "Recipe\nPicture"
+                        markup: "true"
+                        size_hint: None, None
+                        size: 85, 85
+                        pos_hint: {"top": 1}
 
                     BoxLayout:
-                        orientation: "horizontal"
-                        size_hint: 1, None
-                        height: 128
-                        pos_hint: {"y": 1}
-                        spacing: 10
-                        padding: 10
-
-                        Button:
-                            text: "Recipe\nPicture"
-                            markup: "true"
-                            size_hint: None, None
-                            size: 85, 85
-                            pos_hint: {"top": 1}
-
-                        BoxLayout:
-                            pos_hint: {"top": 1}
-                            orientation: "vertical"
-                            size_hint: None, None
-                            size: 200, 128
-                            padding: 5
-                            spacing: 2
-                            size_hint_x: .5
-                            canvas:
-                                Color:
-                                    rgba: 150/255, 150/255, 150/255, 1
-                                Rectangle:
-                                    pos: self.pos
-                                    size: self.size
-
-                            CategoryTagLabel:
-                                text: "Category: "
-                            CategoryTagLabel:
-                                text: "Meal: "
-                            CategoryTagLabel:
-                                text: "Prep Time: "
-                            CategoryTagLabel:
-                                text: "Difficulty: "
-                            CategoryTagLabel:
-                                text: "Price: "
-                            CategoryTagLabel:
-                                text: "Ethnicity: "
-
-                    #BoxLayout:
-                        #pos_hint: {"y": 0}
-                    #    orientation: "vertical"
-                    #    spacing: 10
-
-                    #GridLayout:
-                    #    rows: 2
-                    #    size_hint: 1, None
-                        #height: self.minimum_height
-
-                    BoxLayout
+                        pos_hint: {"top": 1}
                         orientation: "vertical"
-                        #pos_hint: {"y": 1}
-                        id: "ing_ins"
-                        padding: 10
+                        size_hint: None, None
+                        size: 200, 128
+                        padding: 5
+                        spacing: 2
+                        size_hint_x: .5
+                        canvas:
+                            Color:
+                                rgba: 150/255, 150/255, 150/255, 1
+                            Rectangle:
+                                pos: self.pos
+                                size: self.size
+
+                        CategoryTagLabel:
+                            text: "Category: "
+                        CategoryTagLabel:
+                            text: "Meal: "
+                        CategoryTagLabel:
+                            text: "Prep Time: "
+                        CategoryTagLabel:
+                            text: "Difficulty: "
+                        CategoryTagLabel:
+                            text: "Price: "
+                        CategoryTagLabel:
+                            text: "Ethnicity: "
+
+                #BoxLayout:
+                    #pos_hint: {"y": 0}
+                #    orientation: "vertical"
+                #    spacing: 10
+
+                #GridLayout:
+                #    rows: 2
+                #    size_hint: 1, None
+                    #height: self.minimum_height
+
+                BoxLayout
+                    orientation: "vertical"
+                    pos_hint: {"x": .3, "top": .4}
+                    id: "ing_ins"
+                    padding: 10
 
 
-                        Label
-                            text: "[b]Ingredients:[/b]\n"
-                            size_hint: (None, None)
-                            size: self.texture_size
-                            halign: "left"
-                            markup: True
+                    Label
+                        text: "[b]Ingredients:[/b]\n"
+                        size_hint: (None, None)
+                        size: self.texture_size
+                        halign: "left"
+                        markup: True
 
-                        Label:
-                            text: "Beans\nGreeens\nTomatoes\nPotatoes\nwheat\nmilk\na\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nm\nn\no\np"
-                            size_hint: None, None
-                            size: self.texture_size
-                            halign: "left"
-                            valign: "top"
-                            markup: True
+                    Label:
+                        text: "Beans\nGreeens\nTomatoes\nPotatoes\nwheat\nmilk\na\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nm\nn\no\np"
+                        size_hint: None, None
+                        size: self.texture_size
+                        halign: "left"
+                        valign: "top"
+                        markup: True
 
-                    #GridLayout
+                #GridLayout
 
-                        #rows: 2
-                        #size_hint: 1,None
-                        #height: self.minimum_height
+                    #rows: 2
+                    #size_hint: 1,None
+                    #height: self.minimum_height
 
-                        Label
-                            text: "[b]Instructions:[/b]\n"
-                            size_hint: (None, None)
-                            size: self.texture_size
-                            halign: "left"
-                            valign: "top"
-                            markup: True
+                    Label
+                        text: "[b]Instructions:[/b]\n"
+                        size_hint: (None, None)
+                        size: self.texture_size
+                        halign: "left"
+                        valign: "top"
+                        markup: True
 
 
-                        Label:
-                            text: "1) Boil water\n2) Let it cool"
-                            size_hint: None, None
-                            size: self.texture_size
-                            halign: "left"
-                            markup: True
+                    Label:
+                        text: "1) Boil water\n2) Let it cool"
+                        size_hint: None, None
+                        size: self.texture_size
+                        halign: "left"
+                        markup: True
 
