@@ -16,6 +16,8 @@ from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
 from kivy.uix.dropdown import DropDown
+from kivy.uix.textinput import TextInput
+
 
 
 

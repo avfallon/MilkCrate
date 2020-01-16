@@ -15,9 +15,12 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.properties import ListProperty, StringProperty, ObjectProperty
+from kivy.uix.dropdown import DropDown
 
 
 
+from recipes_controller import *
+controller = Controller()
 from model_w_recipe import *
 model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
 
@@ -63,13 +66,14 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
         if is_selected:
-            print("selection changed to {0}".format(rv.data[index]))
+	        controller.open_recipe_page(rv.data[index])
+            #print("selection changed to {0}".format(rv.data[index]))
         else:
             print("selection removed for {0}".format(rv.data[index]))
 
 
-#    def on_release(self, rv, index, is_selected):
-#        print(rv.data[index])
+    def on_release(self, rv, index, is_selected):
+        print(rv.data[index])
 
 
 			#print("HELLO selection changed to {0}".format(rv.data[index]))
@@ -79,7 +83,7 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 class RV(RecycleView):
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        self.data = [{'text': str(x)} for x in range(10)]
+        self.data = [{'text': recipe_name} for recipe_name in model.recipe_dict]
 
 
 class RVScreen(Screen):
@@ -94,7 +98,8 @@ class ScreenManagerApp(App):
         root.add_widget(RVScreen(name='RVScreen'))
         return root
 
-
+class CustomDropDown(DropDown):
+    pass
 
 
 
@@ -126,12 +131,12 @@ class MyScreenManager(ScreenManager):
 
 class testApp(App):
 	def build(self):
-		return MyScreenManager()
-
+		screen_manager = MyScreenManager()
+		return screen_manager
 		#return RecipeViewScreen()
 		#return HomeScreen()
 
 
 
-print("HI")
+print("POOP")
 testApp().run()

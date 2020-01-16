@@ -48,28 +48,53 @@
         padding: 10
         spacing: 10
 
-#        BoxLayout:
-#            orientation: "vertical"
-#            padding: 10
-#            spacing: 10
-
         FloatLayout:
             size_hint: None, None
-            size: 200, 500
+            size: 1000, 500
             pos_hint: {"x": 0, "top": 1}
+
+            Button:
+                text: "<"
+                font_size: "25sp"
+                size_hint: None, None
+                size: 40, 40
+                pos_hint: { "x": 0, "top": 1}
+                on_press: root.manager.current = 'recipeView'
+
+            Button:
+                text: ">"
+                font_size: "25sp"
+                size_hint: None, None
+                size: 40, 40
+                pos_hint: { "x": .04, "top": 1}
+                on_press: root.manager.current = 'recipeView'
 
             Button:
                 text: "Recipe Home"
                 size_hint: None, None
-                size: 100, 50
-                pos_hint: { "x": 0, "top": 1}
+                size: 100, 40
+                pos_hint: { "x": .09, "top": 1}
                 on_press: root.manager.current = 'recipeView'
+
+            TextInput:
+                hint_text: "Search"
+                multiline: "false"
+                size_hint: None, None
+                size: 450, 30
+                pos_hint: {"x": .2, "top": .99}
+
+            Button:
+                text: "Search"
+                size_hint: None, None
+                size: 90, 40
+                pos_hint: {"x": .655, "top": 1}
+
 
             BoxLayout:
                 orientation: "vertical"
                 size_hint: None, None
-                size: 200, 400
-                pos_hint: {"x": 0, "top": .88}
+                size: 189, 400
+                pos_hint: {"x": 0, "top": .9}
 
                 canvas:
                     Color:
@@ -78,31 +103,19 @@
                         pos: self.pos
                         size: self.size
 
-        BoxLayout:
-            orientation: "vertical"
+        #BoxLayout:
+         #   orientation: "vertical"
 
             Label:
-                text: "     All Recipes Test"
+                text: "All Recipes"
                 font_size: 30
                 size_hint: None, None
                 size: self.texture_size
-                pos_hint: {"top": 1}
+                pos_hint: {"x": .25, "top": .87}
 
             RV:
+                pos_hint: {"x": .25, "top": .78}
 
-
-            #ScrollView:
-             #   id: recipe_screen_scrlv
-
-             #   RecycleView
-              #      viewclass: 'RecycleViewRow'
-
-            RecycleBoxLayout:
-                default_size: None, dp(56)
-                default_size_hint: 1, None
-                size_hint_y: None
-                height: self.minimum_height
-                orientation: 'vertical'
 
 
 
@@ -126,10 +139,10 @@
                 padding: 10
 
                 Button:
-                    text: "Recipe Home"
+                    text: "<-"
                     size_hint: .1, .1
                     pos_hint: {"top": 1}
-                    on_press: root.manager.current = 'home'
+                    on_press: root.manager.current = root.manager.previous()
 
                 GridLayout:
                     rows: 3
