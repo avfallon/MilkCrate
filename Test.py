@@ -19,16 +19,12 @@ from kivy.uix.dropdown import DropDown
 from kivy.uix.textinput import TextInput
 
 
-
-
 from recipes_controller import *
 controller = Controller()
-from model_w_recipe import *
-model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
 
+s_m = ScreenManager()
 
 # RecycleView stuff
-
 class CustomScreen(Screen):
     hue = NumericProperty(0)
 
@@ -78,14 +74,13 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         print(rv.data[index])
 
 
-			#print("HELLO selection changed to {0}".format(rv.data[index]))
 
 
 
 class RV(RecycleView):
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        self.data = [{'text': recipe_name} for recipe_name in model.recipe_dict]
+        self.data = controller.make_recipe_list()
 
 
 class RVScreen(Screen):
@@ -105,22 +100,18 @@ class CustomDropDown(DropDown):
 
 
 
-
-
 class HomeScreen(Screen):
 	recipe_list = ObjectProperty()
 
 	def tester(self):
 		print("Test complete")
 
-	def populate_recipe_list(self, category, value):
-		search_dictionary = {value: category}
-		name_list = model.filter_recipes(search_dictionary)
-		for recipe in name_list:
-			self.recipe_list.adapter.data.extend([recipe])
-		self.recipe_list._trigger_reset_populate()
-
-	pass
+	def fill_recipe_page(self, recipe_name):
+		info_dict = controller.open_recipe_page(recipe_name)
+		for item in info_dict:
+			print(item)
+		root.manager.current
+		return
 
 
 class RecipeViewScreen(Screen):
@@ -134,10 +125,10 @@ class MyScreenManager(ScreenManager):
 class testApp(App):
 	def build(self):
 		screen_manager = MyScreenManager()
+		s_m = screen_manager
 		return screen_manager
 		#return RecipeViewScreen()
 		#return HomeScreen()
-
 
 
 print("POOP")
