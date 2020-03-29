@@ -1,33 +1,6 @@
-#: import view Test
-#: import model model_w_recipe
-#: import controller recipes_controller
-#: import ListAdapter kivy.adapters.listadapter.ListAdapter
-#: import ListItemButton kivy.uix.listview.ListItemButton
-
-
-# RecycleView stuff
-
-
-<MyScreenManager>
-    HomeScreen:
-        name: "home"
-    RecipeViewScreen:
-        name: "recipeView"
-
-
-#<RecycleViewRow>:
-#    orientation: 'horizontal'
-#    Button:
-#        text: root.text
-#        on_press: root.go_to_rec(root.text)
-
-
-#<CategoryTagLabel@Label>
-#    size_hint: None, None
-#    size: self.texture_size
-#    pos_hint: {"top": 1}
-
-
+# RecycleView custom widget
+# this declares the "buttons" inside the recycle view list, e.g. the list of recipes in
+# the Homescreen
 <RV>:
     viewclass: 'SelectableLabel'
     SelectableRecycleBoxLayout:
@@ -38,7 +11,7 @@
         height: self.minimum_height
         orientation: 'vertical'
 
-
+# The guts of each button in the RV
 <SelectableLabel>:
     # Draw a background to indicate selection
     canvas.before:
@@ -54,10 +27,12 @@
         padding: 10
 
         FloatLayout:
+            id: "home_float"
             size_hint: None, None
             size: 1000, 500
             pos_hint: {"x": 0, "top": 1}
 
+            # Back button, switches to last screen visited
             Button:
                 text: "<"
                 font_size: "25sp"
@@ -66,6 +41,8 @@
                 pos_hint: { "x": 0, "top": 1}
                 on_press: root.manager.current = root.manager.previous()
 
+            # Forward button, should go to "previous screen" if the back button is used
+            # Currently implemented like back button FIXME
             Button:
                 text: ">"
                 font_size: "25sp"
@@ -74,6 +51,8 @@
                 pos_hint: { "x": .04, "top": 1}
                 on_press: root.manager.current = root.manager.previous()
 
+            # Button to open an empty, editable recipe page
+            # Currently opens the generic recipe view screen FIXME
             Button:
                 text: "New Recipe"
                 size_hint: None, None
@@ -81,6 +60,7 @@
                 pos_hint: { "x": .09, "top": 1}
                 on_press: root.manager.current = 'recipeView'
 
+            # Search bar, created but not linked up to any search function FIXME
             TextInput:
                 hint_text: "Search"
                 multiline: "false"
@@ -88,6 +68,8 @@
                 size: 450, 30
                 pos_hint: {"x": .2, "top": .99}
 
+            # Search button, should search database for recipe entered in search bar
+            # currently fills the recipe screen? dont think it actually does anything FIXME
             Button:
                 text: "Search"
                 size_hint: None, None
@@ -95,7 +77,7 @@
                 pos_hint: {"x": .655, "top": 1}
                 on_press: root.fill_recipe_page("Tiramisu")
 
-
+            # Grey box for categories and dropdowns to go into
             BoxLayout:
                 orientation: "vertical"
                 size_hint: None, None
@@ -109,6 +91,12 @@
                         pos: self.pos
                         size: self.size
 
+            # Category trees to go in grey box FIXME
+            # Should autofill from database with column names
+            #Button:
+
+
+            # Title label
             Label:
                 text: "All Recipes"
                 font_size: 34
@@ -116,6 +104,8 @@
                 size: self.texture_size
                 pos_hint: {"x": .23, "top": .89}
 
+            # RecycleView list of recipes
+            # uses custom widget declared outside the Home Screen
             RV:
                 pos_hint: {"x": .25, "top": .78}
 
@@ -124,16 +114,19 @@
     BoxLayout:
         padding: 10
 
+        # Scroll View to make the screen scrollable, i dont think it works FIXME
         ScrollView:
             id: recipe_screen_scrlv
             do_scroll_x: False
             size: self.size
 
+            # Frame for the entire page, maybe worth pushing this up to top
             FloatLayout:
                 size_hint: None, None
                 size: 1000, 500
                 pos_hint: {"x": 0, "top": 1}
 
+                # Back button, brings you back to the last screen you were at
                 Button:
                     text: "<"
                     font_size: 25
@@ -142,6 +135,7 @@
                     pos_hint: { "x": 0, "top": 1}
                     on_press: root.manager.current = root.manager.previous()
 
+                # Edit recipe button, to switch from view screen to an editable screen
                 Button:
                     text: "Edit Recipe"
                     size_hint: None, None
@@ -149,6 +143,7 @@
                     pos_hint: { "x": .047, "top": 1}
                     on_press: root.manager.current = 'recipeView'
 
+                # Simple Recipe Title label
                 Label:
                     text: "Recipe Name"
                     font_size: 33
@@ -156,12 +151,14 @@
                     size: self.texture_size
                     pos_hint: {"x": .16, "top": 1}
 
+                # button that is placeholder for a picture of the food, uploaded by user
                 Button:
                     text: "Recipe Picture"
                     size_hint: None, None
                     size: 125, 125
                     pos_hint: { "x": .01, "top": .89}
 
+                # Grey box with categories in it
                 BoxLayout:
                     pos_hint: {"x": .16, "top": .89}
                     size_hint: None, None
@@ -176,12 +173,15 @@
                             pos: self.pos
                             size: self.size
 
+                    # Placeholding label with hardcoded categories
+                    # This would be replaced by autogenerated fields from the columns of DB
                     Label:
                         text: "Category:\nMeal:\nPrep Time:\nDifficulty:\nPrice:\nEthnicity: "
                         pos_hint: {"top": 1}
                         size_hint: None, None
                         size: self.texture_size
 
+                # Title label for ingredients section
                 Label:
                     text: "[b]Ingredients[/b]"
                     markup: True
@@ -190,12 +190,14 @@
                     size: self.texture_size
                     pos_hint: {"x": .03, "top": .6}
 
+                # Hardcoded ingredients section for recipe, this would be automatically generated
                 Label:
                     text: "Beans\nGreeens\nTomatoes\nPotatoes\nwheat\nmilk\na\nb\nc\nd\ne\nf\ng\nh\ni\nj\nk\nl\nm\nn\no\np"
                     size_hint: None, None
                     size: self.texture_size
                     pos_hint: {"x": .03, "top": .52}
 
+                # Title label for instructions section
                 Label:
                     text: "[b]Instructions[/b]"
                     markup: True
@@ -204,6 +206,7 @@
                     size: self.texture_size
                     pos_hint: {"x": .3, "top": .6}
 
+                # Hardcoded instructions section, this would be automatically generated
                 Label:
                     text: "1) Boil Water\n2) Let it cool"
                     size_hint: None, None
