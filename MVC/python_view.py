@@ -1,11 +1,8 @@
-from kivy.app import App
 # from kivy.uix.boxlayout import BoxLayout
-from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
 
 # RecycleView stuff
 from kivy.app import App
-from kivy.lang import Builder
 from kivy.properties import BooleanProperty
 from kivy.properties import NumericProperty
 from kivy.uix.behaviors import FocusBehavior
@@ -14,7 +11,7 @@ from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
-from kivy.properties import ListProperty, StringProperty, ObjectProperty
+from kivy.properties import ObjectProperty
 from kivy.uix.dropdown import DropDown
 
 

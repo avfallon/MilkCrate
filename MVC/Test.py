@@ -7,14 +7,9 @@ from kivy.uix.recycleboxlayout import RecycleBoxLayout
 from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
-from kivy.properties import ObjectProperty
 from kivy.uix.screenmanager import ScreenManager, Screen
-from kivy.uix.dropdown import DropDown
-from kivy.uix.textinput import TextInput
 
 
-from recipes_controller import *
-controller = Controller()
 
 
 # RecycleView stuff
@@ -75,52 +70,45 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 class RV(RecycleView):
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        self.data = controller.make_recipe_list()
+        #self.data = self.controller.make_recipe_list()
 
 
 class RVScreen(Screen):
     pass
 
 
-class CustomDropDown(DropDown):
-    pass
-
-
 class HomeScreen(Screen):
-    recipe_list = ObjectProperty()
+    def __init__(self, **kwargs):
+        super(HomeScreen, self).__init__(**kwargs)
+
+    def view_recipe(self):
+        self.manager.current = "recipeView"
 
     # opens and fills recipe page with information from database
     def fill_recipe_page(self, recipe_name):
-        info_dict = controller.open_recipe_page(recipe_name)
+        info_dict = self.controller.open_recipe_page(recipe_name)
         print("Fill_recipe_page")
         self.manager.current = "recipeView"
         return
 
 
 class RecipeViewScreen(Screen):
+
+    def go_home(self):
+        self.manager.current = "home"
     pass
 
 
 class TestApp(App):
 
     def build(self):
-        screen_man = ScreenManager()
-
-        home = HomeScreen(name="home")
-        test_rv = RV()
-
-        recipe_view = RecipeViewScreen(name="recipeView")
-
-        screen_man.add_widget(home)
-        screen_man.add_widget(recipe_view)
+        screen_man = self.instantiate()
         return screen_man
 
     def instantiate(self):
         screen_man = ScreenManager()
 
         home = HomeScreen(name="home")
-        test_rv = RV()
-
         recipe_view = RecipeViewScreen(name="recipeView")
 
         screen_man.add_widget(home)
@@ -132,6 +120,76 @@ class TestApp(App):
         print("hello")
 
 
+class View:
+    def __init__(self, controller):
+        self.controller = controller
+        TestApp().run()
 
-print("POOP")
-#TestApp().run()
+    def implement(self):
+        print("implement")
+
+
+
+
+
+
+
+
+
+
+
+class Controller:
+	def __init__(self):
+
+		self.current_recipe_name = ""
+		self.current_recipe_info = {}
+
+	def instantiate(self, view, model):
+		self.view = view
+		self.model = model
+
+	def save_new_recipe(self, col1, col2, col3, col4, col5, col6, col7, col8):
+		pass
+		# Takes in all values entered into text boxes, these will be the recipe information
+			# Going to have to be a limit on how many categories,
+			# if there are less, just pass blank, this function won't process them
+
+		# updates model with arguments
+		# This function ends, but the view function that calls it will then open that new recipe's page
+
+	def get_recipe_info(self, recipe_name):
+		recipe = self.model.get_recipe(recipe_name)
+		self.current_recipe_name = recipe_name
+		self.current_recipe_info = recipe.recipe_info
+		return self.current_recipe_info
+		# accesses information from model for that recipe
+		# calls view function to open recipe page w/ that info
+
+
+class Main:
+	def __init__(self):
+		controller = Controller()
+		view = View(controller)
+		#model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
+		#controller.instantiate(view, model)
+
+
+	#  fill recipes to main home screen, the opener
+	#while(1):
+		#pass
+		# Receive message from the view, what has just been pressed
+		# Get either new recipe list or the recipe info for that click
+		# call function in view that A) switches to recipe screen and fills the info
+		# B) changes to a new category screen
+		# C) changes to edit recipe
+
+		# clock on recipe to view
+		# recipe to edit
+		# category to category screen
+		# search
+		# back
+		# settings
+
+
+Main()
+
