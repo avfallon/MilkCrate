@@ -180,6 +180,8 @@ class RecipeBook:
 	def get_recipe(self, recipe_name):
 		if recipe_name in self.recipe_dict:
 			return self.recipe_dict[recipe_name]
+		else:
+			print("Can't find recipe")
 
 
 
