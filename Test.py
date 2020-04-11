@@ -51,16 +51,13 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         self.selected = is_selected
         if is_selected:
             # opens the page associated with that recipe name
-            print("yaya")
             recipe_name = rv.data[index]["text"]
             print(recipe_name)
             recipe_info = Controller.get_recipe_info(recipe_name)
             print(recipe_info)
 
-
         else:
             print("selection removed for {0}".format(rv.data[index]))
-
 
     def on_release(self, rv, index, is_selected):
         print(rv.data[index])
@@ -69,6 +66,7 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 class RV(RecycleView):
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
+        self.data = [{'text': key} for key in Controller.get_recipe_list()]
 
 
 class RVScreen(Screen):
@@ -81,7 +79,6 @@ class HomeScreen(Screen):
 
     def view_recipe(self):
         self.manager.current = "recipeView"
-
 
     # opens and fills recipe page with information from database
     def fill_recipe_page(self, recipe_name):

@@ -21,6 +21,12 @@
             pos: self.pos
             size: self.size
 
+<RecycleViewRow>:
+    orientation: 'horizontal'
+    Button:
+        text: root.text
+        on_press: root.go_to_rec(root.text)
+
 
 <HomeScreen>
     BoxLayout:
