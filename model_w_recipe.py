@@ -12,6 +12,7 @@ class Recipe:
 		self.recipe_name = table_row[0]
 
 		self.recipe_info = {
+			"name": table_row[0],
 			"ingredients": table_row[1],
 			"instructions": table_row[2],
 			"category": table_row[3],

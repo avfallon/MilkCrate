@@ -8,7 +8,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
-from Controller import Controller
+#from Controller import Controller
 
 
 current_rec = {
@@ -63,7 +63,7 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
             # opens the page associated with that recipe name
             recipe_name = rv.data[index]["text"]
             print(recipe_name)
-            recipe_info = Controller.get_recipe_info(recipe_name)
+            recipe_info = rv.controller.get_recipe_info(recipe_name)
             print(recipe_info)
             current_rec = recipe_info
             rv.manager.current = "recipeView"
@@ -77,19 +77,25 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 
 class RV(RecycleView):
     manager = ObjectProperty(None)
+    controller = ObjectProperty(None)
+
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        self.data = [{'text': key, "manager": self.manager} for key in Controller.get_recipe_list()]
+        #self.data = [{'text': key} for key in self.controller.get_recipe_list()]
 
     def update(self):
         print("printing updating")
 
+    def fill_data(self):
+        self.data = [{'text': key} for key in self.controller.get_recipe_list()]
+        print("fill_data")
 
 class RVScreen(Screen):
     pass
 
 
 class HomeScreen(Screen):
+    controller = ObjectProperty(None)
     def __init__(self, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
 
@@ -98,13 +104,13 @@ class HomeScreen(Screen):
 
     # opens and fills recipe page with information from database
     def fill_recipe_page(self, recipe_name):
-        info_dict = Controller.get_recipe_info(recipe_name)
+        info_dict = self.controller.get_recipe_info(recipe_name)
         print(info_dict)
-        self.manager.current = "recipeView"
         return
 
 
 class RecipeViewScreen(Screen):
+    controller = ObjectProperty(None)
     def __init__(self, **kwargs):
         super(RecipeViewScreen, self).__init__(**kwargs)
         #self.recipe_info = current_rec
@@ -119,15 +125,15 @@ class RecipeViewScreen(Screen):
 
 
 class TestApp(App):
-
+    controller = ObjectProperty(None)
     def build(self):
         screen_man = self.instantiate()
         return screen_man
 
     def instantiate(self):
         screen_man = ScreenManager()
-        screen_man.add_widget(HomeScreen(name="home"))
-        screen_man.add_widget(RecipeViewScreen(name="recipeView"))
+        screen_man.add_widget(HomeScreen(name="home", controller=self.controller))
+        screen_man.add_widget(RecipeViewScreen(name="recipeView", controller=self.controller))
         return screen_man
 
     # returns app.run
@@ -137,11 +143,21 @@ class TestApp(App):
 
 
 class View:
-    def __init__(self):
-        TestApp().run()
+    def __init__(self, controller_in):
+        app = TestApp()
+        app.controller = controller_in
+        app.run()
 
     def implement(self):
         print("implement")
+
+
+
+
+
+
+
+
 
 
 
@@ -167,5 +183,5 @@ class Main:
         # settings
 
 
-main = Main()
+#main = Main()
 

@@ -3,6 +3,7 @@
 # the Homescreen
 <RV>:
     manager: None
+    controller: None
     viewclass: 'SelectableLabel'
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
@@ -31,6 +32,7 @@
 
 
 <HomeScreen>
+    rv: rv
     BoxLayout:
         padding: 10
 
@@ -83,7 +85,7 @@
                 size_hint: None, None
                 size: 90, 40
                 pos_hint: {"x": .655, "top": 1}
-                on_press: root.fill_recipe_page("Tiramisu")
+                on_press: root.rv.fill_data()
 
             # Grey box for categories and dropdowns to go into
             BoxLayout:
@@ -115,9 +117,11 @@
             # RecycleView list of recipes
             # uses custom widget declared outside the Home Screen
             RV:
-                #id: rv
+                id: rv
                 pos_hint: {"x": .25, "top": .78}
                 manager: root.manager
+                controller: root.controller
+                data: self.data
 
 
 
