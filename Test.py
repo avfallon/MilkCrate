@@ -1,5 +1,5 @@
 from kivy.app import App
-from kivy.properties import BooleanProperty
+from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.properties import NumericProperty
 from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.label import Label
@@ -10,6 +10,17 @@ from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
 from Controller import Controller
 
+
+current_rec = {
+    "ingredients" : "A list of Ingredients",
+    "instructions" : "A list of Instructions",
+    "category" : "category",
+    "meal": "meal list",
+    "prep time" : "prep time",
+    "difficulty" : "difficulty",
+    "price" : "price",
+    "ethnicity" : "ethnicity"
+}
 
 # RecycleView stuff
 class CustomScreen(Screen):
@@ -45,7 +56,6 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def on_press(self):
         self.selected = True
 
-
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
@@ -55,6 +65,8 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
             print(recipe_name)
             recipe_info = Controller.get_recipe_info(recipe_name)
             print(recipe_info)
+            current_rec = recipe_info
+            rv.manager.current = "recipeView"
 
         else:
             print("selection removed for {0}".format(rv.data[index]))
@@ -64,9 +76,13 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 
 
 class RV(RecycleView):
+    manager = ObjectProperty(None)
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        self.data = [{'text': key} for key in Controller.get_recipe_list()]
+        self.data = [{'text': key, "manager": self.manager} for key in Controller.get_recipe_list()]
+
+    def update(self):
+        print("printing updating")
 
 
 class RVScreen(Screen):
@@ -89,6 +105,13 @@ class HomeScreen(Screen):
 
 
 class RecipeViewScreen(Screen):
+    def __init__(self, **kwargs):
+        super(RecipeViewScreen, self).__init__(**kwargs)
+        #self.recipe_info = current_rec
+
+    def build(self):
+        #self.recipe_info = current_rec
+        print("building recipe")
 
     def go_home(self):
         self.manager.current = "home"
@@ -103,17 +126,14 @@ class TestApp(App):
 
     def instantiate(self):
         screen_man = ScreenManager()
-
-        home = HomeScreen(name="home")
-        recipe_view = RecipeViewScreen(name="recipeView")
-
-        screen_man.add_widget(home)
-        screen_man.add_widget(recipe_view)
+        screen_man.add_widget(HomeScreen(name="home"))
+        screen_man.add_widget(RecipeViewScreen(name="recipeView"))
         return screen_man
 
     # returns app.run
     def recipe_click(self):
         print("hello")
+
 
 
 class View:

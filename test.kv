@@ -2,6 +2,7 @@
 # this declares the "buttons" inside the recycle view list, e.g. the list of recipes in
 # the Homescreen
 <RV>:
+    manager: None
     viewclass: 'SelectableLabel'
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
@@ -20,6 +21,7 @@
         Rectangle:
             pos: self.pos
             size: self.size
+
 
 <RecycleViewRow>:
     orientation: 'horizontal'
@@ -113,7 +115,9 @@
             # RecycleView list of recipes
             # uses custom widget declared outside the Home Screen
             RV:
+                #id: rv
                 pos_hint: {"x": .25, "top": .78}
+                manager: root.manager
 
 
 
