@@ -8,7 +8,6 @@ class Controller(EventDispatcher):
 	def __init__(self):
 		self.model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
 		self.view = View(self)
-		print(self.view.test)
 		self.view.run_app()
 
 	def get_recipe_list(self):

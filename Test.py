@@ -106,10 +106,17 @@ class RecipeViewScreen(Screen):
         self.manager.current = "home"
 
 
+class EditRecipeScreen(Screen):
+    controller = ObjectProperty(None)
+    def __init__(self, **kwargs):
+        super(EditRecipeScreen, self).__init__(**kwargs)
+
+
 class TestApp(App):
     manager = ObjectProperty(None)
     home = ObjectProperty(None)
     recipeView = ObjectProperty(None)
+    editRecipe = ObjectProperty(None)
     controller = ObjectProperty(None)
 
     def build(self):
@@ -119,9 +126,11 @@ class TestApp(App):
     def instantiate(self):
         screen_man = ScreenManager()
         self.home = HomeScreen(name="home", controller=self.controller)
-        self.recipeView = (RecipeViewScreen(name="recipeView", controller=self.controller))
+        self.recipeView = RecipeViewScreen(name="recipeView", controller=self.controller)
+        self.editRecipe = EditRecipeScreen(name="editRecipe", controller=self.controller)
         screen_man.add_widget(self.home)
         screen_man.add_widget(self.recipeView)
+        screen_man.add_widget(self.editRecipe)
         return screen_man
 
     # returns list of recipe names for recycleview instantiation
@@ -133,7 +142,7 @@ class View:
     def __init__(self, controller_in):
         self.app = TestApp()
         self.app.controller = controller_in
-        self.test = "hellooo"
 
+    # Separate run from init to allow view instantiation in controller, before running pauses everything
     def run_app(self):
         self.app.run()
