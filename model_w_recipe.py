@@ -187,7 +187,7 @@ class RecipeBook:
 
 
 
-model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
+#model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
 #for item in model.get_table():
 	#print(item)
 #dict = {

@@ -50,10 +50,7 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         if is_selected:
             # opens the page associated with that recipe name
             recipe_name = rv.data[index]["text"]
-            print(recipe_name)
-            recipe_info = rv.controller.get_recipe_info(recipe_name)
-            print(recipe_info)
-            current_rec = recipe_info
+            rv.controller.switch_recipe(recipe_name)
             rv.manager.current = "recipeView"
 
         else:
@@ -66,110 +63,77 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 class RV(RecycleView):
     manager = ObjectProperty(None)
     controller = ObjectProperty(None)
-    model_data = []
-
-    #def build(self):
-        #self.model_data = [{'text': key} for key in self.controller.get_recipe_list()]
 
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
 
     def update(self):
-        print("printing updating")
-        self.data.update = [{'text': key} for key in self.controller.get_recipe_list()]
+        print("Updating recipe list")
+        self.data = [{'text': key} for key in self.controller.get_recipe_list()]
 
 class RVScreen(Screen):
     pass
 
+class CategoryLabel(Label):
+    pass
 
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
-    rv_data = []
     def __init__(self, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
-        self.rv_data = [{'text': key} for key in self.controller.get_recipe_list()]
 
     def view_recipe(self):
         self.manager.current = "recipeView"
-
-    # opens and fills recipe page with information from database
-    def fill_rv_data(self):
-        rv.data = [{'text': key} for key in self.controller.get_recipe_list()]
 
 
 class RecipeViewScreen(Screen):
     controller = ObjectProperty(None)
     def __init__(self, **kwargs):
         super(RecipeViewScreen, self).__init__(**kwargs)
-        #self.recipe_info = current_rec
 
-    def build(self):
-        #self.recipe_info = current_rec
-        print("building recipe")
+    def update_recipe(self, recipe_info):
+        self.ids.ingredients.text = recipe_info["ingredients"]
+        self.ids.instructions.text = recipe_info["instructions"]
+        self.ids.category.text = self.ids.category.text + recipe_info["category"]
+        self.ids.meal.text = self.ids.meal.text + recipe_info["meal"]
+        self.ids.ethnicity.text = self.ids.ethnicity.text + recipe_info["ethnicity"]
+        self.ids.difficulty.text = self.ids.difficulty.text + recipe_info["difficulty"]
+        self.ids.price.text = self.ids.price.text + recipe_info["price"]
+        self.ids.prep.text = self.ids.prep.text + recipe_info["prep time"]
+
 
     def go_home(self):
         self.manager.current = "home"
-    pass
 
 
 class TestApp(App):
+    manager = ObjectProperty(None)
+    home = ObjectProperty(None)
+    recipeView = ObjectProperty(None)
     controller = ObjectProperty(None)
+
     def build(self):
-        screen_man = self.instantiate()
-        return screen_man
+        self.manager = self.instantiate()
+        return self.manager
 
     def instantiate(self):
         screen_man = ScreenManager()
-        screen_man.add_widget(HomeScreen(name="home", controller=self.controller))
-        screen_man.add_widget(RecipeViewScreen(name="recipeView", controller=self.controller))
+        self.home = HomeScreen(name="home", controller=self.controller)
+        self.recipeView = (RecipeViewScreen(name="recipeView", controller=self.controller))
+        screen_man.add_widget(self.home)
+        screen_man.add_widget(self.recipeView)
         return screen_man
 
-    # returns app.run
+    # returns list of recipe names for recycleview instantiation
     def gen_rv_data(self):
         return [{'text': key} for key in self.controller.get_recipe_list()]
 
 
-
 class View:
     def __init__(self, controller_in):
-        app = TestApp()
-        app.controller = controller_in
-        app.run()
+        self.app = TestApp()
+        self.app.controller = controller_in
+        self.test = "hellooo"
 
-    def implement(self):
-        print("implement")
-
-
-
-
-
-
-
-
-
-
-
-class Main:
-    def __init__(self):
-        view = View()
-        # controller.instantiate(view, model)
-
-
-    # fill recipes to main home screen, the opener
-    # while(1):
-        # pass
-        # Receive message from the view, what has just been pressed
-        # Get either new recipe list or the recipe info for that click
-        # call function in view that A) switches to recipe screen and fills the info
-        # B) changes to a new category screen
-        # C) changes to edit recipe
-        # clock on recipe to view
-        # recipe to edit
-        # category to category screen
-        # search
-        # back
-        # settings
-
-
-#main = Main()
-
+    def run_app(self):
+        self.app.run()
