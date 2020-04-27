@@ -4,6 +4,7 @@
 <RV>:
     manager: None
     controller: None
+    data: ([{'text': str(x)} for x in range(100)])
     viewclass: 'SelectableLabel'
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
@@ -85,7 +86,7 @@
                 size_hint: None, None
                 size: 90, 40
                 pos_hint: {"x": .655, "top": 1}
-                on_press: root.rv.fill_data()
+                on_press: root.rv.update
 
             # Grey box for categories and dropdowns to go into
             BoxLayout:
@@ -121,7 +122,7 @@
                 pos_hint: {"x": .25, "top": .78}
                 manager: root.manager
                 controller: root.controller
-                data: self.data
+                data: app.gen_rv_data()
 
 
 

@@ -8,19 +8,7 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
-#from Controller import Controller
 
-
-current_rec = {
-    "ingredients" : "A list of Ingredients",
-    "instructions" : "A list of Instructions",
-    "category" : "category",
-    "meal": "meal list",
-    "prep time" : "prep time",
-    "difficulty" : "difficulty",
-    "price" : "price",
-    "ethnicity" : "ethnicity"
-}
 
 # RecycleView stuff
 class CustomScreen(Screen):
@@ -78,17 +66,17 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 class RV(RecycleView):
     manager = ObjectProperty(None)
     controller = ObjectProperty(None)
+    model_data = []
+
+    #def build(self):
+        #self.model_data = [{'text': key} for key in self.controller.get_recipe_list()]
 
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
-        #self.data = [{'text': key} for key in self.controller.get_recipe_list()]
 
     def update(self):
         print("printing updating")
-
-    def fill_data(self):
-        self.data = [{'text': key} for key in self.controller.get_recipe_list()]
-        print("fill_data")
+        self.data.update = [{'text': key} for key in self.controller.get_recipe_list()]
 
 class RVScreen(Screen):
     pass
@@ -96,17 +84,17 @@ class RVScreen(Screen):
 
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
+    rv_data = []
     def __init__(self, **kwargs):
         super(HomeScreen, self).__init__(**kwargs)
+        self.rv_data = [{'text': key} for key in self.controller.get_recipe_list()]
 
     def view_recipe(self):
         self.manager.current = "recipeView"
 
     # opens and fills recipe page with information from database
-    def fill_recipe_page(self, recipe_name):
-        info_dict = self.controller.get_recipe_info(recipe_name)
-        print(info_dict)
-        return
+    def fill_rv_data(self):
+        rv.data = [{'text': key} for key in self.controller.get_recipe_list()]
 
 
 class RecipeViewScreen(Screen):
@@ -137,8 +125,8 @@ class TestApp(App):
         return screen_man
 
     # returns app.run
-    def recipe_click(self):
-        print("hello")
+    def gen_rv_data(self):
+        return [{'text': key} for key in self.controller.get_recipe_list()]
 
 
 
