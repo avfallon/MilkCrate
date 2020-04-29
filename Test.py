@@ -79,8 +79,8 @@ class CategoryLabel(Label):
 
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
-    def __init__(self, **kwargs):
-        super(HomeScreen, self).__init__(**kwargs)
+    #def __init__(self, **kwargs):
+        #super(HomeScreen, self).__init__(**kwargs)
 
     def view_recipe(self):
         self.manager.current = "recipeView"
@@ -88,8 +88,7 @@ class HomeScreen(Screen):
 
 class RecipeViewScreen(Screen):
     controller = ObjectProperty(None)
-    def __init__(self, **kwargs):
-        super(RecipeViewScreen, self).__init__(**kwargs)
+    recipe_info = ObjectProperty(None)
 
     def update_recipe(self, recipe_info):
         self.ids.ingredients.text = recipe_info["ingredients"]
@@ -102,14 +101,10 @@ class RecipeViewScreen(Screen):
         self.ids.prep.text = self.ids.prep.text + recipe_info["prep time"]
 
 
-    def go_home(self):
-        self.manager.current = "home"
-
-
 class EditRecipeScreen(Screen):
     controller = ObjectProperty(None)
-    def __init__(self, **kwargs):
-        super(EditRecipeScreen, self).__init__(**kwargs)
+
+
 
 
 class TestApp(App):

@@ -10,20 +10,28 @@ class Controller(EventDispatcher):
 		self.view = View(self)
 		self.view.run_app()
 
-	def get_recipe_list(self):
-		return self.model.recipe_dict
-
+	# accesses information from model for that recipe
+	# calls view function to open recipe page w/ that info
 	def switch_recipe(self, name):
-		recipe_info = self.model.get_recipe(name).recipe_info
+		recipe_info = self.get_recipe_info(name)
 		self.view.app.recipeView.update_recipe(recipe_info)
 
-
+	def get_recipe_list(self):
+		return self.model.recipe_dict
 
 	def get_recipe_info(self, name):
 		recipe = self.model.get_recipe(name)
 		return recipe.recipe_info
-	# accesses information from model for that recipe
-	# calls view function to open recipe page w/ that info
+
+	def new_recipe(self):
+		self.view.app.editRecipe.title = ""
+		self.view.app.editRecipe.ingredients = ""
+		self.view.app.editRecipe.instructions = ""
+
+		pass
+
+	def edit_recipe(self):
+		pass
 
 class Main:
 	def __init__(self):
