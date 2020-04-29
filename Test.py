@@ -1,6 +1,7 @@
 from kivy.app import App
 from kivy.properties import BooleanProperty, ObjectProperty
 from kivy.properties import NumericProperty
+from kivy.uix.textinput import TextInput
 from kivy.uix.behaviors import FocusBehavior
 from kivy.uix.label import Label
 from kivy.uix.recycleboxlayout import RecycleBoxLayout
@@ -53,9 +54,6 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
             rv.controller.switch_recipe(recipe_name)
             rv.manager.current = "recipeView"
 
-        else:
-            print("selection removed for {0}".format(rv.data[index]))
-
     def on_release(self, rv, index, is_selected):
         print(rv.data[index])
 
@@ -68,7 +66,6 @@ class RV(RecycleView):
         super(RV, self).__init__(**kwargs)
 
     def update(self):
-        print("Updating recipe list")
         self.data = [{'text': key} for key in self.controller.get_recipe_list()]
 
 class RVScreen(Screen):
@@ -77,34 +74,99 @@ class RVScreen(Screen):
 class CategoryLabel(Label):
     pass
 
+class CategoryInput(TextInput):
+    pass
+
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
-    #def __init__(self, **kwargs):
-        #super(HomeScreen, self).__init__(**kwargs)
+    app = ObjectProperty(None)
 
-    def view_recipe(self):
-        self.manager.current = "recipeView"
+    def new_recipe(self):
+        self.app.editRecipe.new_recipe()
+        self.manager.current = "editRecipe"
 
 
 class RecipeViewScreen(Screen):
     controller = ObjectProperty(None)
-    recipe_info = ObjectProperty(None)
+    app = ObjectProperty(None)
+    recipe_info = {}
 
-    def update_recipe(self, recipe_info):
+    def fill_recipe(self, recipe_info):
+        self.recipe_info = recipe_info
+        self.ids.name.text = recipe_info["name"]
         self.ids.ingredients.text = recipe_info["ingredients"]
         self.ids.instructions.text = recipe_info["instructions"]
-        self.ids.category.text = self.ids.category.text + recipe_info["category"]
-        self.ids.meal.text = self.ids.meal.text + recipe_info["meal"]
-        self.ids.ethnicity.text = self.ids.ethnicity.text + recipe_info["ethnicity"]
-        self.ids.difficulty.text = self.ids.difficulty.text + recipe_info["difficulty"]
-        self.ids.price.text = self.ids.price.text + recipe_info["price"]
-        self.ids.prep.text = self.ids.prep.text + recipe_info["prep time"]
+        self.ids.category.text = "Category: " + recipe_info["category"]
+        self.ids.meal.text = "Meal: " + recipe_info["meal"]
+        self.ids.ethnicity.text = "Ethnicity: " + recipe_info["ethnicity"]
+        self.ids.difficulty.text = "Difficulty: " + recipe_info["difficulty"]
+        self.ids.price.text = "Price: " + recipe_info["price"]
+        self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
 
+    def edit_recipe(self):
+        self.app.editRecipe.fill_recipe(self.recipe_info)
+        self.manager.current = "editRecipe"
 
 class EditRecipeScreen(Screen):
     controller = ObjectProperty(None)
+    app = ObjectProperty(None)
+    NEW_ID = "#*$&^#*($&#"
+    recipe_id = NEW_ID
 
+    def fill_recipe(self, recipe_info):
+        if recipe_info == None:
+            print("Invalid recipe")
+            self.manager.current = "home"
+            return
+        self.recipe_id = recipe_info["name"]
+        self.ids.name.text = recipe_info["name"]
+        self.ids.ingredients.text = recipe_info["ingredients"]
+        self.ids.instructions.text = recipe_info["instructions"]
+        self.ids.category.text = "Category: " + recipe_info["category"]
+        self.ids.meal.text = "Meal: " + recipe_info["meal"]
+        self.ids.ethnicity.text = "Ethnicity: " + recipe_info["ethnicity"]
+        self.ids.difficulty.text = "Difficulty: " + recipe_info["difficulty"]
+        self.ids.price.text = "Price: " + recipe_info["price"]
+        self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
 
+    def new_recipe(self):
+        self.recipe_id = self.NEW_ID
+        self.ids.name.text = ""
+        self.ids.ingredients.text = ""
+        self.ids.instructions.text = ""
+        self.ids.category.text = "Category: "
+        self.ids.meal.text = "Meal: "
+        self.ids.ethnicity.text = "Ethnicity: "
+        self.ids.difficulty.text = "Difficulty: "
+        self.ids.price.text = "Price: "
+        self.ids.prep.text = "Prep Time: "
+
+    def save_recipe(self):
+        new_info = {
+            "name": self.ids.name.text,
+            "ingredients": self.ids.ingredients.text,
+            "instructions": self.ids.instructions.text,
+            "category": self.ids.category.text[9:],
+            "meal": self.ids.meal.text[5:],
+            "prep time": self.ids.prep.text[10:],
+            "difficulty": self.ids.difficulty.text[11:],
+            "price": self.ids.price.text[6:],
+            "ethnicity": self.ids.ethnicity.text[10:]}
+
+        self.controller.save_recipe(self.recipe_id, new_info)
+
+        self.app.home.rv.update()
+        self.controller.switch_recipe(new_info["name"])
+        self.manager.transition.direction = 'right'
+        self.manager.current = "recipeView"
+
+    def delete_recipe(self):
+        if self.recipe_id == self.NEW_ID:
+            self.manager.current = "home"
+        else:
+            self.controller.delete_recipe(self.recipe_id)
+            self.app.home.rv.update()
+            self.manager.current = "home"
 
 
 class TestApp(App):
@@ -120,9 +182,9 @@ class TestApp(App):
 
     def instantiate(self):
         screen_man = ScreenManager()
-        self.home = HomeScreen(name="home", controller=self.controller)
-        self.recipeView = RecipeViewScreen(name="recipeView", controller=self.controller)
-        self.editRecipe = EditRecipeScreen(name="editRecipe", controller=self.controller)
+        self.home = HomeScreen(name="home", controller=self.controller, app=self)
+        self.recipeView = RecipeViewScreen(name="recipeView", controller=self.controller, app=self)
+        self.editRecipe = EditRecipeScreen(name="editRecipe", controller=self.controller, app=self)
         screen_man.add_widget(self.home)
         screen_man.add_widget(self.recipeView)
         screen_man.add_widget(self.editRecipe)

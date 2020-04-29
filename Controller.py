@@ -14,24 +14,30 @@ class Controller(EventDispatcher):
 	# calls view function to open recipe page w/ that info
 	def switch_recipe(self, name):
 		recipe_info = self.get_recipe_info(name)
-		self.view.app.recipeView.update_recipe(recipe_info)
+		self.view.app.recipeView.fill_recipe(recipe_info)
 
 	def get_recipe_list(self):
 		return self.model.recipe_dict
 
 	def get_recipe_info(self, name):
 		recipe = self.model.get_recipe(name)
-		return recipe.recipe_info
+		if recipe == None:
+			return None
+		else:
+			return recipe.recipe_info
 
-	def new_recipe(self):
-		self.view.app.editRecipe.title = ""
-		self.view.app.editRecipe.ingredients = ""
-		self.view.app.editRecipe.instructions = ""
 
-		pass
+	def save_recipe(self, recipe_id, recipe_info):
+		save_result = True
+		if recipe_id == "":
+			save_result = self.model.add_recipe(recipe_info)
+		else:
+			save_result = self.model.edit_recipe(recipe_id, recipe_info)
+		#Eventually change to popup FIXME
+		return save_result
 
-	def edit_recipe(self):
-		pass
+	def delete_recipe(self, recipe_name):
+		return self.model.delete_recipe(recipe_name)
 
 class Main:
 	def __init__(self):

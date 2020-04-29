@@ -85,18 +85,20 @@ class RecipeBook:
 	# Purpose: Add a row to the recipe database
 	# Input: the info for every column in that row, i.e the recipe name, ingredients, instructions, and various tags
 	# Output: 0 for success, -1 if not added to the database
-	def add_recipe(self, recipe_name, ingredients, instructions, category,
-						meal, prep_time, difficulty, price, ethnicity):
+	def add_recipe(self, recipe_info):
 		sql = "INSERT INTO %s VALUES ('%s','%s','%s','%s','%s','%s','%s','%s','%s');"
-		vals = (self.main_table, recipe_name, ingredients, instructions, category,
-					meal, prep_time, difficulty, price, ethnicity)
+		vals = (self.main_table, recipe_info["name"], recipe_info["ingredients"], recipe_info["instructions"],
+					recipe_info["category"], recipe_info["meal"], recipe_info["prep time"],
+					recipe_info["difficulty"], recipe_info["price"], recipe_info["ethnicity"])
+		print(sql % vals)
 		self.cursor.execute(sql % vals)
 
 		self.mydb.commit()
 
-		if not self.recipe_exists(recipe_name):
+		if not self.recipe_exists(recipe_info["name"]):
 			print("The recipe could not be added")
 			return False
+		print("The recipe has successfully been added")
 
 		#COULD TAKE A LONG TIME
 		self.build_recipe_dict()
@@ -108,26 +110,30 @@ class RecipeBook:
 	#        all of the "new" recipe information. If you want certain information to stay the same, just input the
 	#        same value for that tag
 	# Output: 0 on success, -1 if your new name matches another recipe, or if the existing recipe could not be found
-	def edit_recipe(self, current_name, new_name, new_ing, new_ins, new_cat, new_meal, new_prep, new_dif, new_price,
-	                new_ethnic):
-		if not self.recipe_exists(current_name):
+	def edit_recipe(self, original_name, recipe_info):
+		if not self.recipe_exists(original_name):
 			print("Cannot find old recipe")
 			return False
-		if self.recipe_exists(new_name) and new_name != current_name:
+		if self.recipe_exists(recipe_info["name"]) and recipe_info["name"] != original_name:
 			print("That recipe already exists ")
 			return False
 
 		sql = "UPDATE %s SET recipe_name = '%s', ingredients = '%s', instructions = '%s', category = '%s', " \
 		      "meal = '%s', prep_time = '%s', difficulty = '%s', price = '%s', ethnicity = '%s' WHERE %s = '%s'"
-		vals = (self.main_table, new_name, new_ing, new_ins, new_cat,
-		        new_meal, new_prep, new_dif, new_price, new_ethnic, self.key, current_name)
+		vals = (self.main_table, recipe_info["name"], recipe_info["ingredients"], recipe_info["instructions"], recipe_info["category"],
+		        recipe_info["meal"], recipe_info["prep time"], recipe_info["difficulty"], recipe_info["price"], recipe_info["ethnicity"], self.key, original_name)
 
 		self.cursor.execute(sql % vals)
 		self.mydb.commit()
 
+		if not self.recipe_exists(recipe_info["name"]):
+			print("The recipe could not be added")
+			return False
+		print("The recipe has been successfully edited")
+
 		#COULD TAKE A LONG TIME
 		self.build_recipe_dict()
-		return self.recipe_exists(new_name)
+		return True
 
 
 
