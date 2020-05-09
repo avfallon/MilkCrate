@@ -9,6 +9,8 @@ from kivy.uix.recycleview import RecycleView
 from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
+from kivy.uix.screenmanager import NoTransition
+
 
 
 # RecycleView stuff
@@ -50,9 +52,12 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         self.selected = is_selected
         if is_selected:
             # opens the page associated with that recipe name
-            recipe_name = rv.data[index]["text"]
-            rv.controller.switch_recipe(recipe_name)
+            selection = rv.data[index]["text"]
+            rv.controller.switch_recipe(selection)
+            rv.manager.transition = NoTransition()
+            rv.manager.last = rv.manager.current
             rv.manager.current = "recipeView"
+
 
     def on_release(self, rv, index, is_selected):
         print(rv.data[index])
@@ -61,11 +66,12 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 class RV(RecycleView):
     manager = ObjectProperty(None)
     controller = ObjectProperty(None)
+    type = "recipe"
 
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
 
-    def update(self):
+    def update_rec(self):
         self.data = [{'text': key} for key in self.controller.get_recipe_list()]
 
 class RVScreen(Screen):
@@ -83,6 +89,7 @@ class HomeScreen(Screen):
 
     def new_recipe(self):
         self.app.editRecipe.new_recipe()
+        self.manager.last = self.manager.current
         self.manager.current = "editRecipe"
 
 
@@ -105,6 +112,7 @@ class RecipeViewScreen(Screen):
 
     def edit_recipe(self):
         self.app.editRecipe.fill_recipe(self.recipe_info)
+        self.manager.last = self.manager.current
         self.manager.current = "editRecipe"
 
 class EditRecipeScreen(Screen):
@@ -116,6 +124,7 @@ class EditRecipeScreen(Screen):
     def fill_recipe(self, recipe_info):
         if recipe_info == None:
             print("Invalid recipe")
+            self.manager.last = self.manager.current
             self.manager.current = "home"
             return
         self.recipe_id = recipe_info["name"]
@@ -155,17 +164,20 @@ class EditRecipeScreen(Screen):
 
         self.controller.save_recipe(self.recipe_id, new_info)
 
-        self.app.home.rv.update()
+        self.app.home.rv.update_rec()
         self.controller.switch_recipe(new_info["name"])
-        self.manager.transition.direction = 'right'
+        self.manager.transition = NoTransition()
+        self.manager.last = self.manager.current
         self.manager.current = "recipeView"
 
     def delete_recipe(self):
         if self.recipe_id == self.NEW_ID:
+            self.manager.last = self.manager.current
             self.manager.current = "home"
         else:
             self.controller.delete_recipe(self.recipe_id)
-            self.app.home.rv.update()
+            self.app.home.rv.update_rec()
+            self.manager.last = self.manager.current
             self.manager.current = "home"
 
 
@@ -180,6 +192,7 @@ class TestApp(App):
         self.manager = self.instantiate()
         return self.manager
 
+    # Create and fill the screen manager at the app level
     def instantiate(self):
         screen_man = ScreenManager()
         self.home = HomeScreen(name="home", controller=self.controller, app=self)
@@ -188,10 +201,12 @@ class TestApp(App):
         screen_man.add_widget(self.home)
         screen_man.add_widget(self.recipeView)
         screen_man.add_widget(self.editRecipe)
+        # create a variable to implement < and > buttons
+        screen_man.last = "home"
         return screen_man
 
     # returns list of recipe names for recycleview instantiation
-    def gen_rv_data(self):
+    def gen_rv_recs(self):
         return [{'text': key} for key in self.controller.get_recipe_list()]
 
 

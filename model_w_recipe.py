@@ -28,7 +28,6 @@ class Recipe:
 			return self.recipe_info[category]
 		return ""
 
-
 	def check_category(self, column, needle):
 		# Weigh timing of splitting into lists during search or building list in recipe constructor
 		if column in self.recipe_info and needle in self.recipe_info[column]:
@@ -39,7 +38,6 @@ class Recipe:
 class RecipeBook:
 	# How could I make the columns more generic?
 	def __init__(self, username, password, host, database, main_table, referencing_table, key):
-
 		self.mydb = mysql.connector.connect(
 			user=username,
 			password=password,
@@ -55,9 +53,7 @@ class RecipeBook:
 
 		#list of all recipe objects in the DB
 		self.recipe_dict = {}
-
 		self.build_recipe_dict()
-
 
 	def build_recipe_dict(self):
 		self.recipe_dict.clear()
@@ -67,7 +63,6 @@ class RecipeBook:
 			new_recipe = Recipe(row)
 			self.recipe_dict[new_recipe.recipe_name] = new_recipe
 
-
 	def recipe_exists(self, needle_name):
 		self.cursor.execute("SELECT %s FROM %s WHERE %s = '%s';"
 							% (self.key, self.main_table, self.key, needle_name))
@@ -75,7 +70,6 @@ class RecipeBook:
 			return True
 
 		return False
-
 
 	def get_table(self):
 		self.cursor.execute("SELECT * FROM %s ORDER BY %s" % (self.main_table, self.key))
@@ -136,7 +130,6 @@ class RecipeBook:
 		return True
 
 
-
 	# Purpose: remove a certain recipe from the database
 	# Input: the name of the recipe
 	# Output: 0 if deleted or -1 if the recipe was already not in the database
@@ -159,6 +152,7 @@ class RecipeBook:
 		self.build_recipe_dict()
 		return True
 
+
 	# Purpose: filter through recipes to find all those that match ALL of the parameters
 	# Input: a dictionary of all parameters, with the category as the key
 	#   and the value to search for in that category as the value
@@ -174,7 +168,6 @@ class RecipeBook:
 
 		return name_list
 
-
 	def filter_one_param(self, column, needle, search_list):
 		return_list = []
 		for recipe in search_list:
@@ -182,7 +175,6 @@ class RecipeBook:
 				return_list.append(recipe)
 
 		return return_list
-
 
 	def get_recipe(self, recipe_name):
 		if recipe_name in self.recipe_dict:
