@@ -45,8 +45,12 @@
     multiline: "false"
     font_size: 13
 
+<SidebarButton>
+    size_hint: None, None
+    size: 70, 40
+
 <HomeScreen>
-    #rv: rec_rv
+    rv: rec_rv
     BoxLayout:
         padding: 10
 
@@ -122,11 +126,48 @@
 
             # Category trees to go in grey box FIXME
             # Should autofill from database with column names
-            #Button:
+
+            SidebarButton:
+                text: "Home"
+                pos_hint: {"x": 0, "top": .88}
+                on_press:
+                    root.rv.update_rec("","")
+                    Title.text = "All Recipes"
+
+            SidebarButton:
+                text: "Category"
+                pos_hint: {"x": 0, "top": .8}
+                on_press: root.show_category(self.text)
+
+            SidebarButton:
+                text: "Meal"
+                pos_hint: {"x": 0, "top": .72}
+                on_press: root.show_category(self.text)
+
+            SidebarButton:
+                text: "Ethnicity"
+                pos_hint: {"x": 0, "top": .64}
+                on_press: root.show_category(self.text)
+
+            SidebarButton:
+                text: "Difficulty"
+                pos_hint: {"x": 0, "top": .56}
+                on_press: root.show_category(self.text)
+
+            SidebarButton:
+                text: "Price"
+                pos_hint: {"x": 0, "top": .48}
+                on_press: root.show_category(self.text)
+
+            SidebarButton:
+                text: "Prep Time"
+                pos_hint: {"x": 0, "top": .40}
+                on_press: root.show_category(self.text)
 
 
             # Title label
             Label:
+                id: Title
                 text: "All Recipes"
                 font_size: 34
                 size_hint: None, None

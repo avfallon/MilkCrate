@@ -6,7 +6,8 @@ class Controller(EventDispatcher):
 	view = ObjectProperty(None)
 
 	def __init__(self):
-		self.model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
+		self.model = RecipeBook("andrew", "password", "localhost", "recipes",
+		                        "recipes", "ingredients", "recipe_name")
 		self.view = View(self)
 		self.view.run_app()
 
@@ -23,26 +24,35 @@ class Controller(EventDispatcher):
 		else:
 			return recipe.recipe_info
 
-	def get_recipe_list(self):
-		return self.model.recipe_dict
+	# category_dict says which recipes to return, either all of them (home),
+	# all the recipes in a particular category {upper_level:lower_level),
+	# or the low level category options for a high level category (value of "")
+	def get_recipe_list(self, category_dict):
+		return self.model.filter_recipes(category_dict)
 
 	def save_recipe(self, recipe_id, recipe_info):
+		NEW_RECIPE = ""
 		save_result = True
-		if recipe_id == "":
+		if recipe_id == NEW_RECIPE:
 			save_result = self.model.add_recipe(recipe_info)
 		else:
 			save_result = self.model.edit_recipe(recipe_id, recipe_info)
-		#Eventually change to popup FIXME
+		#Eventually change to popup instead of just printing FIXME
 		return save_result
 
-
+	# Delete a recipe from the database, called by view
 	def delete_recipe(self, recipe_name):
 		return self.model.delete_recipe(recipe_name)
 
+	# Return the lower level values of a specified upper level category
+	def get_category_list(self, upper_cat):
+		return self.model.get_category_values(upper_cat)
+
+
+
 class Main:
 	def __init__(self):
-		controller = Controller()
-
+		Controller()
 
 
 Main()

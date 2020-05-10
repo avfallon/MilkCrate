@@ -29,10 +29,20 @@ class Recipe:
 		return ""
 
 	def check_category(self, column, needle):
+		# Allow for returning all recipes of a certain category
+		if needle == "":
+			return True
 		# Weigh timing of splitting into lists during search or building list in recipe constructor
 		if column in self.recipe_info and needle in self.recipe_info[column]:
 				return True
 		return False
+
+	# Returns a dictionary with the recipe's upper level categories as keys
+	# and their lower level contents as values
+	def get_categories(self):
+		cat_dict = dict(self.recipe_info)
+		del cat_dict["name"], cat_dict["ingredients"], cat_dict["instructions"]
+		return cat_dict
 
 
 class RecipeBook:
@@ -51,10 +61,17 @@ class RecipeBook:
 		# Key for this table is the recipe name, all recipe names must be unique
 		self.key = key
 
-		#list of all recipe objects in the DB
+		# Dictionary of all recipe objects in the DB
 		self.recipe_dict = {}
 		self.build_recipe_dict()
 
+		# Dictionary with each upper level category as a key,
+		# and a list of every associated lower level category as its value
+		self.category_dict = {}
+		self.build_categories()
+
+	# Make every row in the database into a recipe object, and add it to the recipe_dict
+	# This is constantly updated to prevent unnecessary database reading
 	def build_recipe_dict(self):
 		self.recipe_dict.clear()
 
@@ -62,6 +79,34 @@ class RecipeBook:
 		for row in table:
 			new_recipe = Recipe(row)
 			self.recipe_dict[new_recipe.recipe_name] = new_recipe
+
+	# Make a dictionary with each upper level category a key and every lower level category
+	# in the database in a list as the value with its upper level category as the key.
+	# Used to fill category_dict instance variable
+	def build_categories(self):
+		return_dict = {}
+		# For each recipe in the database
+		for recipe_name in self.recipe_dict:
+			rec_obj = self.recipe_dict[recipe_name]
+			categories = rec_obj.get_categories()
+			# For each high level category in the current recipe
+			for key in categories:
+				value_list = categories[key].split(",")
+				# Only used in first pass to initialize return_dict keys
+				if key not in return_dict:
+					return_dict[key] = value_list
+				else:
+					# For each low level value in the recipe that is
+					# associated with current high level category
+					for value in value_list:
+						value = value.strip()
+						# if the value has not yet been added, add it
+						if value not in return_dict[key]:
+							new_list = return_dict[key]
+							new_list.append(value)
+							return_dict[key] = new_list
+		self.category_dict = dict(return_dict)
+
 
 	def recipe_exists(self, needle_name):
 		self.cursor.execute("SELECT %s FROM %s WHERE %s = '%s';"
@@ -96,6 +141,7 @@ class RecipeBook:
 
 		#COULD TAKE A LONG TIME
 		self.build_recipe_dict()
+		self.build_categories()
 		return True
 
 
@@ -125,8 +171,9 @@ class RecipeBook:
 			return False
 		print("The recipe has been successfully edited")
 
-		#COULD TAKE A LONG TIME
+		# COULD TAKE A LONG TIME BUT BETTER SAFE THAN SORRY
 		self.build_recipe_dict()
+		self.build_categories()
 		return True
 
 
@@ -159,19 +206,25 @@ class RecipeBook:
 	# Output: a list of the recipe names that match ALL of the input search parameters
 	def filter_recipes(self, search_dict):
 		valid_list = self.recipe_dict.values()
+		#check if search_dict is empty and you should just return all recipes
 		if not (search_dict.get("") == ""):
 			for key in search_dict:
-				valid_list = self.filter_one_param(search_dict[key], key, valid_list)
+				# maybe switch order of key/ value?
+				print("key: ", key, " value: ", search_dict[key])
+				valid_list = self.filter_one_param(key, search_dict[key], valid_list)
+
 		name_list = []
 		for recipe in valid_list:
 			name_list.append(recipe.recipe_name)
 
 		return name_list
 
+	# Return all recipes that match a single search term
 	def filter_one_param(self, column, needle, search_list):
 		return_list = []
 		for recipe in search_list:
 			if recipe.check_category(column, needle):
+				print(recipe.recipe_name)
 				return_list.append(recipe)
 
 		return return_list
@@ -182,12 +235,17 @@ class RecipeBook:
 		else:
 			print("Can't find recipe")
 
+	def get_category_values(self, upper_level_cat):
+		return self.category_dict[upper_level_cat]
+
+
+
 
 
 
 #model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
 #for item in model.get_table():
-	#print(item)
+#	print(item)
 #dict = {
 # 	"cream": "ingredients"
 # }

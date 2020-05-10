@@ -10,7 +10,7 @@ from kivy.uix.recycleview.layout import LayoutSelectionBehavior
 from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.screenmanager import NoTransition
-
+from kivy.uix.button import Button
 
 
 # RecycleView stuff
@@ -53,10 +53,18 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
         if is_selected:
             # opens the page associated with that recipe name
             selection = rv.data[index]["text"]
-            rv.controller.switch_recipe(selection)
-            rv.manager.transition = NoTransition()
-            rv.manager.last = rv.manager.current
-            rv.manager.current = "recipeView"
+            if rv.type == "recipe":
+                print("recipe tree")
+                rv.controller.switch_recipe(selection)
+                rv.manager.transition = NoTransition()
+                rv.manager.last = rv.manager.current
+                rv.manager.current = "recipeView"
+            else:
+                # Contains type of category and specific category name(e.g. "price":"$$")
+                rv.update_rec(rv.upper_cat, selection)
+                print("finished updating RV")
+        self.selected = False
+
 
 
     def on_release(self, rv, index, is_selected):
@@ -66,13 +74,25 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
 class RV(RecycleView):
     manager = ObjectProperty(None)
     controller = ObjectProperty(None)
+    # determines which RV I am clicking for selectable label
     type = "recipe"
+    upper_cat = "home"
 
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
 
-    def update_rec(self):
-        self.data = [{'text': key} for key in self.controller.get_recipe_list()]
+    def update_rec(self, high_level_cat, low_level_cat):
+        # Set identifier so that SelectableLabel knows what to do on_press
+        self.type = "recipe"
+
+        category_dict = {high_level_cat:low_level_cat}
+        self.data = [{'text': key} for key in self.controller.get_recipe_list(category_dict)]
+
+    def update_cat(self, upper_cat):
+        # Set identifier so that SelectableLabel knows what to do on_press
+        self.type = "category"
+        self.data = [{'text': value} for value in self.controller.get_category_list(upper_cat)]
+
 
 class RVScreen(Screen):
     pass
@@ -83,14 +103,27 @@ class CategoryLabel(Label):
 class CategoryInput(TextInput):
     pass
 
+class SidebarButton(Button):
+    pass
+
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
+    rv = ObjectProperty(None)
 
     def new_recipe(self):
         self.app.editRecipe.new_recipe()
         self.manager.last = self.manager.current
         self.manager.current = "editRecipe"
+
+    # Show a recycleview of different category options within an upper-level category
+    # Input: the string of the upper level category name
+    def show_category(self, category_name):
+        lower_cat = category_name.lower()
+        self.rv.upper_cat = lower_cat
+        self.rv.type = "category"
+        self.rv.update_cat(lower_cat)
+        self.ids.Title.text = category_name
 
 
 class RecipeViewScreen(Screen):
@@ -98,6 +131,7 @@ class RecipeViewScreen(Screen):
     app = ObjectProperty(None)
     recipe_info = {}
 
+    # Sets the screen's text to show the input recipe's info
     def fill_recipe(self, recipe_info):
         self.recipe_info = recipe_info
         self.ids.name.text = recipe_info["name"]
@@ -110,17 +144,24 @@ class RecipeViewScreen(Screen):
         self.ids.price.text = "Price: " + recipe_info["price"]
         self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
 
+    # Switch to editing the recipe that is currently being viewed
     def edit_recipe(self):
+        # Fill the edit screen with the current recipe's info
         self.app.editRecipe.fill_recipe(self.recipe_info)
+
+        # Then go to that screen
         self.manager.last = self.manager.current
         self.manager.current = "editRecipe"
 
 class EditRecipeScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
+    # Unique identifier to show the recipe being edited is new
     NEW_ID = "#*$&^#*($&#"
+    # The recipe ID will be set to the recipe name once it is saved
     recipe_id = NEW_ID
 
+    # Sets the screen's text to show the input recipe's info
     def fill_recipe(self, recipe_info):
         if recipe_info == None:
             print("Invalid recipe")
@@ -138,6 +179,7 @@ class EditRecipeScreen(Screen):
         self.ids.price.text = "Price: " + recipe_info["price"]
         self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
 
+    # Set the screen's text to be an empty recipe
     def new_recipe(self):
         self.recipe_id = self.NEW_ID
         self.ids.name.text = ""
@@ -150,30 +192,36 @@ class EditRecipeScreen(Screen):
         self.ids.price.text = "Price: "
         self.ids.prep.text = "Prep Time: "
 
+    # Save the entered text, controller decides whether it is a new or existing recipe
     def save_recipe(self):
         new_info = {
             "name": self.ids.name.text,
             "ingredients": self.ids.ingredients.text,
             "instructions": self.ids.instructions.text,
-            "category": self.ids.category.text[9:],
-            "meal": self.ids.meal.text[5:],
-            "prep time": self.ids.prep.text[10:],
-            "difficulty": self.ids.difficulty.text[11:],
-            "price": self.ids.price.text[6:],
-            "ethnicity": self.ids.ethnicity.text[10:]}
+            "category": self.ids.category.text[10:],
+            "meal": self.ids.meal.text[6:],
+            "prep time": self.ids.prep.text[11:],
+            "difficulty": self.ids.difficulty.text[12:],
+            "price": self.ids.price.text[7:],
+            "ethnicity": self.ids.ethnicity.text[11:]}
 
         self.controller.save_recipe(self.recipe_id, new_info)
 
-        self.app.home.rv.update_rec()
+        #update the recipe screen with the new recipe information
+        self.app.home.rv.update_rec("","")
+        #switch to the recipe screen
         self.controller.switch_recipe(new_info["name"])
         self.manager.transition = NoTransition()
         self.manager.last = self.manager.current
         self.manager.current = "recipeView"
 
+    # Delete the recipe currently being edited
     def delete_recipe(self):
+        # If it is a new recipe, no entry was ever made in database
         if self.recipe_id == self.NEW_ID:
             self.manager.last = self.manager.current
             self.manager.current = "home"
+        # If the user was editing an existing recipe, it must be deleted from database
         else:
             self.controller.delete_recipe(self.recipe_id)
             self.app.home.rv.update_rec()
@@ -205,9 +253,10 @@ class TestApp(App):
         screen_man.last = "home"
         return screen_man
 
-    # returns list of recipe names for recycleview instantiation
+    # returns initial list of recipe names for recycleview instantiation
     def gen_rv_recs(self):
-        return [{'text': key} for key in self.controller.get_recipe_list()]
+        home_dict = {"":""}
+        return [{'text': key} for key in self.controller.get_recipe_list(home_dict)]
 
 
 class View:
