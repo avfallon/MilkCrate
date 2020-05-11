@@ -241,7 +241,7 @@ class EditRecipeScreen(Screen):
             self.manager.current = "home"
 
 
-class TestApp(App):
+class KivyViewApp(App):
     manager = ObjectProperty(None)
     home = ObjectProperty(None)
     recipeView = ObjectProperty(None)
@@ -273,7 +273,7 @@ class TestApp(App):
 
 class View:
     def __init__(self, controller_in):
-        self.app = TestApp()
+        self.app = KivyViewApp()
         self.app.controller = controller_in
 
     # Separate run from init to allow view instantiation in controller, before running pauses everything

@@ -1,5 +1,5 @@
-from model_w_recipe import *
-from Test import *
+from RecipeModel import *
+from KivyView import *
 from kivy.event import EventDispatcher
 
 
