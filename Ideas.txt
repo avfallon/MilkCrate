@@ -1,2 +1,0 @@
-> Include an automatic way to create a recipe database with simple password and username
-> Include a way to install/check if installed python and mySQL

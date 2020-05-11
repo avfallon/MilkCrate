@@ -29,6 +29,7 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     selected = BooleanProperty(False)
     selectable = BooleanProperty(True)
 
+
     """ Add selection support to the Label """
     index = None
 
@@ -55,20 +56,17 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
             selection = rv.data[index]["text"]
             if rv.type == "recipe":
                 print("recipe tree")
-                rv.controller.switch_recipe(selection)
-                rv.manager.transition = NoTransition()
-                rv.manager.last = rv.manager.current
-                rv.manager.current = "recipeView"
+                rv.switch_to_recipe(selection)
             else:
                 # Contains type of category and specific category name(e.g. "price":"$$")
                 rv.update_rec(rv.upper_cat, selection)
-                print("finished updating RV")
+                print("updating category RV")
         self.selected = False
 
 
 
     def on_release(self, rv, index, is_selected):
-        print(rv.data[index])
+        print("on_release: ", rv.data[index])
 
 
 class RV(RecycleView):
@@ -80,6 +78,12 @@ class RV(RecycleView):
 
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
+
+    def switch_to_recipe(self, selection):
+        self.controller.switch_recipe(selection)
+        self.manager.transition = NoTransition()
+        self.manager.last = self.manager.current
+        self.manager.current = "recipeView"
 
     def update_rec(self, high_level_cat, low_level_cat):
         # Set identifier so that SelectableLabel knows what to do on_press
@@ -97,19 +101,28 @@ class RV(RecycleView):
 class RVScreen(Screen):
     pass
 
+
 class CategoryLabel(Label):
     pass
+
 
 class CategoryInput(TextInput):
     pass
 
+
 class SidebarButton(Button):
     pass
+
 
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
     rv = ObjectProperty(None)
+
+    def go_home(self):
+        self.ids.Title.text = "All Recipes"
+        self.rv.update_rec("","")
+        self.manager.current = "home"
 
     def new_recipe(self):
         self.app.editRecipe.new_recipe()
@@ -119,10 +132,9 @@ class HomeScreen(Screen):
     # Show a recycleview of different category options within an upper-level category
     # Input: the string of the upper level category name
     def show_category(self, category_name):
-        lower_cat = category_name.lower()
-        self.rv.upper_cat = lower_cat
-        self.rv.type = "category"
-        self.rv.update_cat(lower_cat)
+        lowered_cat = category_name.lower()
+        self.rv.upper_cat = lowered_cat
+        self.rv.update_cat(lowered_cat)
         self.ids.Title.text = category_name
 
 

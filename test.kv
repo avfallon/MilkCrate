@@ -68,8 +68,8 @@
                 size: 40, 40
                 pos_hint: { "x": 0, "top": 1}
                 on_press:
-                    root.manager.transition = SlideTransition(direction="right")
-                    root.manager.current = root.manager.last
+                    #root.manager.current = root.manager.last
+                    root.go_home()
 
             # Forward button, should go to "previous screen" if the back button is used
             # Currently implemented like back button FIXME
@@ -209,7 +209,6 @@
                     size: 40, 40
                     pos_hint: { "x": 0, "top": 1}
                     on_press:
-                        root.manager.transition = SlideTransition(direction="right")
                         root.manager.current = root.manager.previous()
 
                 # Edit recipe button, to switch from view screen to an editable screen
@@ -309,6 +308,7 @@
                 Label:
                     id: instructions
                     text: "Example Instructions"
+                    text_size: 400, None
                     size_hint: None, None
                     size: self.texture_size
                     pos_hint: {"x": .35, "top": .53}
@@ -338,7 +338,6 @@
                     size: 40, 40
                     pos_hint: { "x": 0, "top": 1}
                     on_press:
-                        root.manager.transition = SlideTransition(direction="right")
                         root.manager.current = root.manager.previous()
 
                 # Edit recipe button, to switch from view screen to an editable screen
@@ -442,5 +441,5 @@
                     hint_text: "ex:\n1) Boil Water\n2) Let it cool"
                     text: ""
                     size_hint: None, None
-                    size: 320, 400
+                    size: 350, 800
                     pos_hint: {"x": .35, "top": .45}
