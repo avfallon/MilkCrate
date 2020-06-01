@@ -8,7 +8,7 @@
 <RV>:
     manager: None
     controller: None
-    viewclass: 'SelectableLabel'
+    viewclass: 'RVLabel'
     SelectableRecycleBoxLayout:
         default_size: None, dp(56)
         #This can be used to center the text in the available space
@@ -16,9 +16,11 @@
         size_hint_y: None
         height: self.minimum_height
         orientation: 'vertical'
+        spacing: 20
+
 
 # The guts of each button in the RV
-<SelectableLabel>:
+<RVLabel>:
     # Draw a background to indicate selection
     canvas.before:
         Color:
@@ -26,6 +28,9 @@
         Rectangle:
             pos: self.pos
             size: self.size
+    font_size: 18
+    size_hint: None, None
+    size: self.texture_size
 
 
 <RecycleViewRow>:
@@ -47,10 +52,13 @@
 
 <SidebarButton>
     size_hint: None, None
-    size: 70, 40
+    height:44
+
+
 
 <HomeScreen>
     rv: rec_rv
+    id: homeKV
     BoxLayout:
         padding: 10
 
@@ -114,7 +122,7 @@
             BoxLayout:
                 orientation: "vertical"
                 size_hint: None, None
-                size: 189, 400
+                size: 100, 300
                 pos_hint: {"x": 0, "top": .9}
 
                 canvas:
@@ -124,45 +132,55 @@
                         pos: self.pos
                         size: self.size
 
-            # Category trees to go in grey box FIXME
-            # Should autofill from database with column names
+            BoxLayout:
+                orientation: "vertical"
+                pos_hint: {"x": 0, "y": .3}
+                size_hint: None, None
+                size: 100, 400
+                SidebarButton:
+                    text: "Home"
+                    pos_hint: {"x": 0, "top": .88}
+                    on_press:
+                        # Update the RV with no category, showing all recipes, and switch there
+                        root.rv.update_rec("","")
+                        Title.text = "All Recipes"
 
-            SidebarButton:
-                text: "Home"
-                pos_hint: {"x": 0, "top": .88}
-                on_press:
-                    root.rv.update_rec("","")
-                    Title.text = "All Recipes"
+                SidebarButton:
+                    id: cat
+                    text: "Category"
+                    pos_hint: {"x": 0, "top": 1}
+                    #on_press: root.show_category(self.text)
+                    on_release:
+                        root.catDD = root.dropdown("category")
+                        root.catDD.open(cat)
 
-            SidebarButton:
-                text: "Category"
-                pos_hint: {"x": 0, "top": .8}
-                on_press: root.show_category(self.text)
 
-            SidebarButton:
-                text: "Meal"
-                pos_hint: {"x": 0, "top": .72}
-                on_press: root.show_category(self.text)
 
-            SidebarButton:
-                text: "Ethnicity"
-                pos_hint: {"x": 0, "top": .64}
-                on_press: root.show_category(self.text)
 
-            SidebarButton:
-                text: "Difficulty"
-                pos_hint: {"x": 0, "top": .56}
-                on_press: root.show_category(self.text)
+                SidebarButton:
+                    text: "Meal"
+                    pos_hint: {"x": 0, "top": .72}
+                    on_press: root.show_category(self.text)
 
-            SidebarButton:
-                text: "Price"
-                pos_hint: {"x": 0, "top": .48}
-                on_press: root.show_category(self.text)
+                SidebarButton:
+                    text: "Ethnicity"
+                    pos_hint: {"x": 0, "top": .64}
+                    on_press: root.show_category(self.text)
 
-            SidebarButton:
-                text: "Prep Time"
-                pos_hint: {"x": 0, "top": .40}
-                on_press: root.show_category(self.text)
+                SidebarButton:
+                    text: "Difficulty"
+                    pos_hint: {"x": 0, "top": .56}
+                    on_press: root.show_category(self.text)
+
+                SidebarButton:
+                    text: "Price"
+                    pos_hint: {"x": 0, "top": .48}
+                    on_press: root.show_category(self.text)
+
+                SidebarButton:
+                    text: "Prep Time"
+                    pos_hint: {"x": 0, "top": .40}
+                    on_press: root.show_category(self.text)
 
 
             # Title label
@@ -209,7 +227,7 @@
                     size: 40, 40
                     pos_hint: { "x": 0, "top": 1}
                     on_press:
-                        root.manager.current = root.manager.previous()
+                        root.manager.current = "home"
 
                 # Edit recipe button, to switch from view screen to an editable screen
                 Button:

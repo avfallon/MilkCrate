@@ -11,6 +11,7 @@ from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.screenmanager import NoTransition
 from kivy.uix.button import Button
+from kivy.uix.dropdown import DropDown
 
 
 # RecycleView stuff
@@ -23,7 +24,7 @@ class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior,
     ''' Adds selection and focus behaviour to the view. '''
 
 
-class SelectableLabel(RecycleDataViewBehavior, Label):
+class RVLabel(RecycleDataViewBehavior, Label):
     ''' Add selection support to the Label '''
     index = None
     selected = BooleanProperty(False)
@@ -36,22 +37,24 @@ class SelectableLabel(RecycleDataViewBehavior, Label):
     def refresh_view_attrs(self, rv, index, data):
         """ Catch and handle the view changes """
         self.index = index
-        return super(SelectableLabel, self).refresh_view_attrs(rv, index, data)
+        return super(RVLabel, self).refresh_view_attrs(rv, index, data)
 
     def on_touch_down(self, touch):
         ''' Add selection on touch down '''
-        if super(SelectableLabel, self).on_touch_down(touch):
+        if super(RVLabel, self).on_touch_down(touch):
             return True
         if self.collide_point(*touch.pos) and self.selectable:
             return self.parent.select_with_touch(self.index, touch)
 
     def on_press(self):
         self.selected = True
+        print("Pressed")
 
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
         self.selected = is_selected
         if is_selected:
+            print("I AM SELECTED")
             # opens the page associated with that recipe name
             selection = rv.data[index]["text"]
             if rv.type == "recipe":
@@ -96,7 +99,7 @@ class RV(RecycleView):
         # Set identifier so that SelectableLabel knows what to do on_press
         self.type = "category"
         self.data = [{'text': value} for value in self.controller.get_category_list(upper_cat)]
-
+        print("Just updated cat")
 
 class RVScreen(Screen):
     pass
@@ -111,13 +114,30 @@ class CategoryInput(TextInput):
 
 
 class SidebarButton(Button):
+    DD = ObjectProperty(None)
     pass
+
+class CategoryDropdown(DropDown):
+    cat_name = ObjectProperty(None)
+    controller = ObjectProperty(None)
+    filled = False
+
+    def fillDD(self):
+        print("FILLDD")
+        if not self.filled:
+            cat_list = self.controller.get_category_list(self.cat_name)
+            for cat in cat_list:
+                btn = SidebarButton(text=cat)
+                btn.bind(on_release=lambda btn: self.select(btn.text))
+                self.add_widget(btn)
+
 
 
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
     rv = ObjectProperty(None)
+    catDD = ObjectProperty(None)
 
     def go_home(self):
         self.ids.Title.text = "All Recipes"
@@ -132,11 +152,20 @@ class HomeScreen(Screen):
     # Show a recycleview of different category options within an upper-level category
     # Input: the string of the upper level category name
     def show_category(self, category_name):
-        lowered_cat = category_name.lower()
-        self.rv.upper_cat = lowered_cat
-        self.rv.update_cat(lowered_cat)
+        lowercase_cat = category_name.lower()
+        self.rv.upper_cat = lowercase_cat
+        self.rv.update_cat(lowercase_cat)
         self.ids.Title.text = category_name
+        self.app.manager.current = "home"
 
+    def dropdown(self, cat_name):
+        dropdown = CategoryDropdown()
+        cat_list = self.controller.get_category_list(cat_name)
+        for cat in cat_list:
+            btn = SidebarButton(text=cat)
+            btn.bind(on_release=lambda btn: self.select(btn.text))
+            dropdown.add_widget(btn)
+        return dropdown
 
 class RecipeViewScreen(Screen):
     controller = ObjectProperty(None)
