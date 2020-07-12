@@ -31,7 +31,6 @@ class Controller(EventDispatcher):
     # all the recipes in a particular category {upper_level:lower_level),
     # or the low level category options for a high level category (value of "")
     def get_recipe_list(self, category_dict):
-        print(category_dict.keys())
         return self.model.filter_recipes(category_dict)
 
     # Save a recipe, either a new one or an edit of an existing recipe

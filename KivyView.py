@@ -146,16 +146,30 @@ class HomeScreen(Screen):
     # input: name of upper level category and its index in stack layout
     def create_dropdown(self, upper_cat, index):
         cat_list = self.controller.get_category_list(upper_cat.lower())
+        btn_count = 0
+        i = index
         for lower_cat in cat_list:
             btn = SidebarButton(text="     " + lower_cat)
             select = lambda cat: self.rv.update_rec(upper_cat.lower(), lower_cat)
             btn.bind(on_release=select)
-            self.ids.sidebarLayout.add_widget(btn, index)
+            print("add widget i: ", i)
+            self.ids.sidebarLayout.add_widget(btn, i)
+            i -= 1
+            btn_count += 1
+        for button in self.ids.sidebarLayout.children[:i]:
+            button.index -= btn_count
+            print(button.text, button.index)
+
 
     def dismiss_dropdown(self, upper_cat, index):
         cat_list = self.controller.get_category_list(upper_cat.lower())
-        for i in range(len(cat_list)):
+        btn_count = 0
+        for j in range(len(cat_list)):
             self.ids.sidebarLayout.remove_widget(self.ids.sidebarLayout.children[index])
+            btn_count += 1
+        for button in self.ids.sidebarLayout.children[:index+1]:
+            button.index += btn_count
+            print(button.text, button.index)
 
 
 class RecipeViewScreen(Screen):
