@@ -63,11 +63,13 @@ class RecipeBook:
 
 		# Dictionary of all recipe objects in the DB
 		self.recipe_dict = {}
+
 		self.build_recipe_dict()
 
 		# Dictionary with each upper level category as a key,
 		# and a list of every associated lower level category as its value
 		self.category_dict = {}
+
 		self.build_categories()
 
 	# Make every row in the database into a recipe object, and add it to the recipe_dict
@@ -237,7 +239,6 @@ class RecipeBook:
 
 	def get_category_values(self, upper_level_cat):
 		return self.category_dict[upper_level_cat]
-
 
 
 

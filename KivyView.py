@@ -12,6 +12,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.screenmanager import NoTransition
 from kivy.uix.button import Button
 from kivy.uix.dropdown import DropDown
+from kivy.uix.stacklayout import StackLayout
 
 
 # RecycleView stuff
@@ -90,6 +91,7 @@ class RV(RecycleView):
 
     def update_rec(self, high_level_cat, low_level_cat):
         # Set identifier so that SelectableLabel knows what to do on_press
+        print("low level cat: ", low_level_cat)
         self.type = "recipe"
 
         category_dict = {high_level_cat:low_level_cat}
@@ -114,24 +116,8 @@ class CategoryInput(TextInput):
 
 
 class SidebarButton(Button):
-    DD = ObjectProperty(None)
+    opened = False
     pass
-
-class CategoryDropdown(DropDown):
-    cat_name = ObjectProperty(None)
-    controller = ObjectProperty(None)
-    filled = False
-
-    def fillDD(self):
-        print("FILLDD")
-        if not self.filled:
-            cat_list = self.controller.get_category_list(self.cat_name)
-            for cat in cat_list:
-                btn = SidebarButton(text=cat)
-                btn.bind(on_release=lambda btn: self.select(btn.text))
-                self.add_widget(btn)
-
-
 
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
@@ -151,21 +137,26 @@ class HomeScreen(Screen):
 
     # Show a recycleview of different category options within an upper-level category
     # Input: the string of the upper level category name
-    def show_category(self, category_name):
-        lowercase_cat = category_name.lower()
-        self.rv.upper_cat = lowercase_cat
-        self.rv.update_cat(lowercase_cat)
-        self.ids.Title.text = category_name
+    def show_category(self, cat_name):
+        self.rv.upper_cat = cat_name
+        self.rv.update_cat(cat_name)
+        self.ids.Title.text = cat_name
         self.app.manager.current = "home"
 
-    def dropdown(self, cat_name):
-        dropdown = CategoryDropdown()
-        cat_list = self.controller.get_category_list(cat_name)
-        for cat in cat_list:
-            btn = SidebarButton(text=cat)
-            btn.bind(on_release=lambda btn: self.select(btn.text))
-            dropdown.add_widget(btn)
-        return dropdown
+    # input: name of upper level category and its index in stack layout
+    def create_dropdown(self, upper_cat, index):
+        cat_list = self.controller.get_category_list(upper_cat.lower())
+        for lower_cat in cat_list:
+            btn = SidebarButton(text="     " + lower_cat)
+            select = lambda cat: self.rv.update_rec(upper_cat.lower(), lower_cat)
+            btn.bind(on_release=select)
+            self.ids.sidebarLayout.add_widget(btn, index)
+
+    def dismiss_dropdown(self, upper_cat, index):
+        cat_list = self.controller.get_category_list(upper_cat.lower())
+        for i in range(len(cat_list)):
+            self.ids.sidebarLayout.remove_widget(self.ids.sidebarLayout.children[index])
+
 
 class RecipeViewScreen(Screen):
     controller = ObjectProperty(None)
