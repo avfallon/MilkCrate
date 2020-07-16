@@ -117,6 +117,7 @@ class CategoryInput(TextInput):
 
 class SidebarButton(Button):
     opened = False
+    upper_cat = ""
     pass
 
 class HomeScreen(Screen):
@@ -137,39 +138,59 @@ class HomeScreen(Screen):
 
     # Show a recycleview of different category options within an upper-level category
     # Input: the string of the upper level category name
+        # Made unnecessary by dropdowns, remove this and rv.upper_cat FIXME
     def show_category(self, cat_name):
         self.rv.upper_cat = cat_name
         self.rv.update_cat(cat_name)
         self.ids.Title.text = cat_name
         self.app.manager.current = "home"
 
+    # Select function bound to dropdown, low level category buttons
+    # input: the instance of the button, which contains upper category and lower category (in text)
+    def dropdown_select(self, button):
+        self.rv.update_rec(button.upper_cat, button.text.strip())
+
+    # purpose: creates the dropdown menu for an upper level category
+    #          when it is selected in the sidebar
     # input: name of upper level category and its index in stack layout
     def create_dropdown(self, upper_cat, index):
         cat_list = self.controller.get_category_list(upper_cat.lower())
+        #counts the dropdown buttons created
         btn_count = 0
+        # tracks the index at which to add the new buttons in the sidebar
         i = index
+
+        #select = lambda self, current_cat=lower_cat: print(current_cat)
+        # Creates buttons for each lower level category associated with the selected
+        # upper level category, binds each button to update the recycleview with the selection,
+        # and adds the button to the sidebar at the appropriate index
         for lower_cat in cat_list:
             btn = SidebarButton(text="     " + lower_cat)
-            select = lambda cat: self.rv.update_rec(upper_cat.lower(), lower_cat)
-            btn.bind(on_release=select)
-            print("add widget i: ", i)
+            btn.upper_cat = upper_cat
+            btn.bind(on_release=self.dropdown_select)
             self.ids.sidebarLayout.add_widget(btn, i)
             i -= 1
             btn_count += 1
+
+        # corrects the index attribute in each button that is (visually) below the
+        # created sidebar, to make further dropdown creation work
         for button in self.ids.sidebarLayout.children[:i]:
             button.index -= btn_count
-            print(button.text, button.index)
 
-
+    # purpose: removes the dropdown (lower level category) buttons from the sidebar
+    # input: the name of the upper level category whose dropdown will be closed, and its index
+    #        in the sidebar
     def dismiss_dropdown(self, upper_cat, index):
         cat_list = self.controller.get_category_list(upper_cat.lower())
         btn_count = 0
         for j in range(len(cat_list)):
             self.ids.sidebarLayout.remove_widget(self.ids.sidebarLayout.children[index])
             btn_count += 1
+
+        # corrects the index attribute in each button that is (visually) below the removed sidebar
         for button in self.ids.sidebarLayout.children[:index+1]:
             button.index += btn_count
-            print(button.text, button.index)
+            #print(button.text, button.index)
 
 
 class RecipeViewScreen(Screen):
