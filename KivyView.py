@@ -23,6 +23,7 @@ class CustomScreen(Screen):
 class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior,
                                  RecycleBoxLayout):
     ''' Adds selection and focus behaviour to the view. '''
+    # touch_deselect_last = BooleanProperty(True)
 
 
 class RVLabel(RecycleDataViewBehavior, Label):
@@ -58,13 +59,15 @@ class RVLabel(RecycleDataViewBehavior, Label):
             print("I AM SELECTED")
             # opens the page associated with that recipe name
             selection = rv.data[index]["text"]
-            if rv.type == "recipe":
-                print("recipe tree")
-                rv.switch_to_recipe(selection)
-            else:
-                # Contains type of category and specific category name(e.g. "price":"$$")
-                rv.update_rec(rv.upper_cat, selection)
-                print("updating category RV")
+#            if rv.type == "recipe":
+            print("recipe tree")
+            self.selected = False
+            rv.switch_to_recipe(selection)
+
+            # else:
+            #     # Contains type of category and specific category name(e.g. "price":"$$")
+            #     rv.update_rec(rv.upper_cat, selection)
+            #     print("updating category RV")
         self.selected = False
 
 
@@ -97,11 +100,9 @@ class RV(RecycleView):
         category_dict = {high_level_cat:low_level_cat}
         self.data = [{'text': key} for key in self.controller.get_recipe_list(category_dict)]
 
-    def update_cat(self, upper_cat):
-        # Set identifier so that SelectableLabel knows what to do on_press
-        self.type = "category"
-        self.data = [{'text': value} for value in self.controller.get_category_list(upper_cat)]
-        print("Just updated cat")
+    def search_results(self, result_list):
+        self.data = [{'text': name} for name in result_list]
+
 
 class RVScreen(Screen):
     pass
@@ -136,14 +137,11 @@ class HomeScreen(Screen):
         self.manager.last = self.manager.current
         self.manager.current = "editRecipe"
 
-    # Show a recycleview of different category options within an upper-level category
-    # Input: the string of the upper level category name
-        # Made unnecessary by dropdowns, remove this and rv.upper_cat FIXME
-    def show_category(self, cat_name):
-        self.rv.upper_cat = cat_name
-        self.rv.update_cat(cat_name)
-        self.ids.Title.text = cat_name
-        self.app.manager.current = "home"
+    def simple_search(self):
+        # print(self.ids.searchbar.text)
+        results = self.controller.simple_name_search(self.ids.searchbar.text)
+        print(results)
+        self.rv.search_results(results)
 
     # Select function bound to dropdown, low level category buttons
     # input: the instance of the button, which contains upper category and lower category (in text)
@@ -324,6 +322,10 @@ class KivyViewApp(App):
     def gen_rv_recs(self):
         home_dict = {"":""}
         return [{'text': key} for key in self.controller.get_recipe_list(home_dict)]
+
+    def simple_search(self, search_text):
+        search_results = self.controller.simple_name_search(search_text)
+        self.home.rv.update_rec(search_results)
 
 
 class View:

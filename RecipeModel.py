@@ -203,6 +203,7 @@ class RecipeBook:
 
 
 	# Purpose: filter through recipes to find all those that match ALL of the parameters
+	#           Really more for the multiple ingredient search function
 	# Input: a dictionary of all parameters, with the category as the key
 	#   and the value to search for in that category as the value
 	# Output: a list of the recipe names that match ALL of the input search parameters
@@ -231,6 +232,15 @@ class RecipeBook:
 
 		return return_list
 
+	# Does simple search of recipe names
+	def name_search(self, search_list):
+		return_list = []
+		for recipe in self.recipe_dict:
+			for word in search_list:
+				if word in recipe:
+					return_list.append(recipe)
+		return return_list
+
 	def get_recipe(self, recipe_name):
 		if recipe_name in self.recipe_dict:
 			return self.recipe_dict[recipe_name]
@@ -244,9 +254,9 @@ class RecipeBook:
 
 
 
-#model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
-#for item in model.get_table():
-#	print(item)
+model = RecipeBook("andrew", "password", "localhost", "recipes", "recipes", "ingredients", "recipe_name")
+for item in model.get_table():
+	print(item)
 #dict = {
 # 	"cream": "ingredients"
 # }

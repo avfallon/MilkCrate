@@ -30,8 +30,18 @@ class Controller(EventDispatcher):
     # category_dict says which recipes to return, either all of them (home),
     # all the recipes in a particular category {upper_level:lower_level),
     # or the low level category options for a high level category (value of "")
+    # FIXME is this still used?
     def get_recipe_list(self, category_dict):
         return self.model.filter_recipes(category_dict)
+
+    # Takes input to the search bar and filters recipes
+    # Returns a list of all recipes containing the search term
+    def simple_name_search(self, search_text):
+        return model.name_search(search_text.split())
+
+    # Advance search, searches ingredients/multiple
+    def adv_search(self):
+        pass
 
     # Save a recipe, either a new one or an edit of an existing recipe
     def save_recipe(self, recipe_id, recipe_info):

@@ -17,6 +17,8 @@
         height: self.minimum_height
         orientation: 'vertical'
         spacing: 20
+        # multiselect: False # ** DIFFERENCE **
+        # touch_multiselect: False # ** DIFFERENCE **
 
 
 # The guts of each button in the RV
@@ -104,8 +106,9 @@
 
             # Search bar, created but not linked up to any search function FIXME
             TextInput:
+                id: searchbar
                 hint_text: "Search"
-                multiline: "false"
+                multiline: False
                 size_hint: None, None
                 size: 450, 30
                 pos_hint: {"x": .2, "top": .99}
@@ -117,7 +120,7 @@
                 size_hint: None, None
                 size: 90, 40
                 pos_hint: {"x": .655, "top": 1}
-                on_press: root.rv.update
+                on_press: root.simple_search()
 
             # Grey box for categories and dropdowns to go into
             BoxLayout:
@@ -154,8 +157,8 @@
                     #index: sidebarLayout.children[id]
                     index: -2
                     on_release:
-                        if not self.opened: root.create_dropdown(self.text, self.index); self.opened = True
-                        else: root.dismiss_dropdown(self.text, self.index-1); self.opened = False
+                        if not self.opened: root.create_dropdown(self.text.lower(), self.index); self.opened = True
+                        else: root.dismiss_dropdown(self.text.lower(), self.index-1); self.opened = False
 
                 SidebarButton:
                     text: "Meal"
