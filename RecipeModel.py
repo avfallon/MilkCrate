@@ -96,7 +96,7 @@ class RecipeBook:
 				value_list = categories[key].split(",")
 				# Only used in first pass to initialize return_dict keys
 				if key not in return_dict:
-					return_dict[key] = value_list
+					return_dict[key] = []
 				else:
 					# For each low level value in the recipe that is
 					# associated with current high level category

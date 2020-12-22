@@ -29,7 +29,8 @@ class SelectableRecycleBoxLayout(FocusBehavior, LayoutSelectionBehavior,
 class RVLabel(RecycleDataViewBehavior, Label):
     ''' Add selection support to the Label '''
     index = None
-    selected = BooleanProperty(False)
+    new_selection = BooleanProperty(False)
+    selected = False
     selectable = BooleanProperty(True)
 
 
@@ -44,36 +45,22 @@ class RVLabel(RecycleDataViewBehavior, Label):
     def on_touch_down(self, touch):
         ''' Add selection on touch down '''
         if super(RVLabel, self).on_touch_down(touch):
+            print("super touch_down")
             return True
         if self.collide_point(*touch.pos) and self.selectable:
+            print("touch_down")
+            self.new_selection = True
             return self.parent.select_with_touch(self.index, touch)
-
-    def on_press(self):
-        self.selected = True
-        print("Pressed")
 
     def apply_selection(self, rv, index, is_selected):
         ''' Respond to the selection of items in the view. '''
-        self.selected = is_selected
-        if is_selected:
+        if self.new_selection:
             print("I AM SELECTED")
+            print("RVLabel index", index, "and text", self.text)
             # opens the page associated with that recipe name
             selection = rv.data[index]["text"]
-#            if rv.type == "recipe":
-            print("recipe tree")
-            self.selected = False
+            self.new_selection = False
             rv.switch_to_recipe(selection)
-
-            # else:
-            #     # Contains type of category and specific category name(e.g. "price":"$$")
-            #     rv.update_rec(rv.upper_cat, selection)
-            #     print("updating category RV")
-        self.selected = False
-
-
-
-    def on_release(self, rv, index, is_selected):
-        print("on_release: ", rv.data[index])
 
 
 class RV(RecycleView):
@@ -82,24 +69,32 @@ class RV(RecycleView):
     # determines which RV I am clicking for selectable label
     type = "recipe"
     upper_cat = "home"
+    just_selected = False
 
     def __init__(self, **kwargs):
         super(RV, self).__init__(**kwargs)
 
+    # Used when a button is selected, goes to the recipe page of that button's recipe text
     def switch_to_recipe(self, selection):
+        # Changes the text on the recipe page to match this recipe
         self.controller.switch_recipe(selection)
         self.manager.transition = NoTransition()
-        self.manager.last = self.manager.current
+        self.manager.last = "home"
         self.manager.current = "recipeView"
 
+    # updates what recipes are shown in the recipe list
+    # Usually used to display the recipes in a low level category, or All Recipes
     def update_rec(self, high_level_cat, low_level_cat):
         # Set identifier so that SelectableLabel knows what to do on_press
-        print("low level cat: ", low_level_cat)
         self.type = "recipe"
+        print("low level cat: ", low_level_cat)
 
-        category_dict = {high_level_cat:low_level_cat}
+        category_dict = {high_level_cat: low_level_cat}
+        # Displays a list of every recipe matching both of those two categories
+        # If two  categories are "", "" then thats a flag for All Recipes
         self.data = [{'text': key} for key in self.controller.get_recipe_list(category_dict)]
 
+    # Displays the input results of a search
     def search_results(self, result_list):
         self.data = [{'text': name} for name in result_list]
 
@@ -127,16 +122,21 @@ class HomeScreen(Screen):
     rv = ObjectProperty(None)
     catDD = ObjectProperty(None)
 
+    # Sets the current screen to be the blank, opening home page, showing all recipes
     def go_home(self):
         self.ids.Title.text = "All Recipes"
+        # Argument is just a flag that means display All Recipes
         self.rv.update_rec("","")
+        self.manager.last = "home"
         self.manager.current = "home"
 
+    # Goes to a new recipe page (a blank edit page)
     def new_recipe(self):
         self.app.editRecipe.new_recipe()
-        self.manager.last = self.manager.current
+        self.manager.last = "home"
         self.manager.current = "editRecipe"
 
+    # Gets search text, checks if it matches exactly with any in the DB, and displays that list
     def simple_search(self):
         # print(self.ids.searchbar.text)
         results = self.controller.simple_name_search(self.ids.searchbar.text)
@@ -147,12 +147,16 @@ class HomeScreen(Screen):
     # input: the instance of the button, which contains upper category and lower category (in text)
     def dropdown_select(self, button):
         self.rv.update_rec(button.upper_cat, button.text.strip())
+        print("Dropdown Select upper")
 
     # purpose: creates the dropdown menu for an upper level category
     #          when it is selected in the sidebar
     # input: name of upper level category and its index in stack layout
     def create_dropdown(self, upper_cat, index):
+        # Gets list of lower level categories within the input upper category
         cat_list = self.controller.get_category_list(upper_cat.lower())
+        print("create dropdown")
+
         #counts the dropdown buttons created
         btn_count = 0
         # tracks the index at which to add the new buttons in the sidebar
@@ -210,6 +214,7 @@ class RecipeViewScreen(Screen):
         self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
 
     # Switch to editing the recipe that is currently being viewed
+    #   (opens a new 'edit Recipe' screen that is filled with the current recipe's info)
     def edit_recipe(self):
         # Fill the edit screen with the current recipe's info
         self.app.editRecipe.fill_recipe(self.recipe_info)
@@ -218,19 +223,28 @@ class RecipeViewScreen(Screen):
         self.manager.last = self.manager.current
         self.manager.current = "editRecipe"
 
+    # Functionality for the back button '<'
+    # goes to the home screen
+    def go_back(self):
+        self.manager.current = "home"
+
+
+
 class EditRecipeScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
     # Unique identifier to show the recipe being edited is new
     NEW_ID = "#*$&^#*($&#"
-    # The recipe ID will be set to the recipe name once it is saved
+    # The recipe ID will be set to the recipe name once it is saved,
+    # this is just a flag for deleting
     recipe_id = NEW_ID
 
-    # Sets the screen's text to show the input recipe's info
+    # Sets the current screen's text to show the input recipe's info
+    # Used to open a recipe for editing
     def fill_recipe(self, recipe_info):
         if recipe_info == None:
             print("Invalid recipe")
-            self.manager.last = self.manager.current
+            self.manager.last = "home"
             self.manager.current = "home"
             return
         self.recipe_id = recipe_info["name"]
@@ -273,6 +287,7 @@ class EditRecipeScreen(Screen):
         self.controller.save_recipe(self.recipe_id, new_info)
 
         #update the recipe screen with the new recipe information
+        # Argument is just a flag that means display All Recipes
         self.app.home.rv.update_rec("","")
         #switch to the recipe screen
         self.controller.switch_recipe(new_info["name"])
@@ -284,16 +299,25 @@ class EditRecipeScreen(Screen):
     def delete_recipe(self):
         # If it is a new recipe, no entry was ever made in database
         if self.recipe_id == self.NEW_ID:
-            self.manager.last = self.manager.current
+            self.manager.last = "home"
             self.manager.current = "home"
         # If the user was editing an existing recipe, it must be deleted from database
         else:
             self.controller.delete_recipe(self.recipe_id)
+            # Fills the recipe list with All Recipes
             self.app.home.rv.update_rec()
-            self.manager.last = self.manager.current
+            self.manager.last = "home"
             self.manager.current = "home"
 
+    # Functionality for back button '<', goes to the last screen before editing
+    # Could be home for a new recipe, or the recipe screen if it is an edit of an existing recipe
+    def go_back(self):
+        print(self.manager.last)
+        self.manager.current = self.manager.last
 
+
+# Wrapper class, this is what is actually running in that window
+# Manages the different screens
 class KivyViewApp(App):
     manager = ObjectProperty(None)
     home = ObjectProperty(None)
@@ -301,6 +325,8 @@ class KivyViewApp(App):
     editRecipe = ObjectProperty(None)
     controller = ObjectProperty(None)
 
+    # Overwrites the super class 'App' build function
+    # NECESSARY TO RUN THE PROGRAM
     def build(self):
         self.manager = self.instantiate()
         return self.manager
@@ -315,6 +341,7 @@ class KivyViewApp(App):
         screen_man.add_widget(self.recipeView)
         screen_man.add_widget(self.editRecipe)
         # create a variable to implement < and > buttons
+        # stores 'edit' or 'home', as a new rec. comes from home, and editing a recipe is edit
         screen_man.last = "home"
         return screen_man
 
