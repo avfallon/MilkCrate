@@ -250,6 +250,9 @@ class RecipeBook:
 	def get_category_values(self, upper_level_cat):
 		return self.category_dict[upper_level_cat]
 
+	def get_categories_list(self):
+		return self.category_dict.keys()
+
 
 
 

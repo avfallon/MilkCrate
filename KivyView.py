@@ -11,6 +11,7 @@ from kivy.uix.recycleview.views import RecycleDataViewBehavior
 from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.screenmanager import NoTransition
 from kivy.uix.button import Button
+from kivy.uix.spinner import Spinner
 from kivy.uix.dropdown import DropDown
 from kivy.uix.stacklayout import StackLayout
 
@@ -124,11 +125,16 @@ class HomeScreen(Screen):
 
     # Sets the current screen to be the blank, opening home page, showing all recipes
     def go_home(self):
-        self.ids.Title.text = "All Recipes"
+        self.ids.title.text = "All Recipes"
         # Argument is just a flag that means display All Recipes
         self.rv.update_rec("","")
         self.manager.last = "home"
         self.manager.current = "home"
+
+    # implementation of the back button on the home page, currently just goes home FIXME
+    def go_back(self):
+        self.go_home()
+
 
     # Goes to a new recipe page (a blank edit page)
     def new_recipe(self):
@@ -143,18 +149,22 @@ class HomeScreen(Screen):
         print(results)
         self.rv.search_results(results)
 
-    # Select function bound to dropdown, low level category buttons
+    # Select function bound to dropdown of low level category buttons, triggered to update recycleview of recipes
     # input: the instance of the button, which contains upper category and lower category (in text)
     def dropdown_select(self, button):
-        self.rv.update_rec(button.upper_cat, button.text.strip())
-        print("Dropdown Select upper")
+        low_level_cat = button.text.strip()
+        self.rv.update_rec(button.upper_cat, low_level_cat)
+        self.ids.title.text = low_level_cat
+        print("Dropdown low-level select: ", low_level_cat)
+
+
 
     # purpose: creates the dropdown menu for an upper level category
     #          when it is selected in the sidebar
     # input: name of upper level category and its index in stack layout
     def create_dropdown(self, upper_cat, index):
         # Gets list of lower level categories within the input upper category
-        cat_list = self.controller.get_category_list(upper_cat.lower())
+        cat_list = self.controller.get_category_values(upper_cat.lower())
         print("create dropdown")
 
         #counts the dropdown buttons created
@@ -183,7 +193,7 @@ class HomeScreen(Screen):
     # input: the name of the upper level category whose dropdown will be closed, and its index
     #        in the sidebar
     def dismiss_dropdown(self, upper_cat, index):
-        cat_list = self.controller.get_category_list(upper_cat.lower())
+        cat_list = self.controller.get_category_values(upper_cat.lower())
         btn_count = 0
         for j in range(len(cat_list)):
             self.ids.sidebarLayout.remove_widget(self.ids.sidebarLayout.children[index])
@@ -199,6 +209,7 @@ class RecipeViewScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
     recipe_info = {}
+
 
     # Sets the screen's text to show the input recipe's info
     def fill_recipe(self, recipe_info):
@@ -233,13 +244,32 @@ class RecipeViewScreen(Screen):
 class EditRecipeScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
+    spinners = {}
     # Unique identifier to show the recipe being edited is new
     NEW_ID = "#*$&^#*($&#"
     # The recipe ID will be set to the recipe name once it is saved,
     # this is just a flag for deleting
     recipe_id = NEW_ID
 
-    # Sets the current screen's text to show the input recipe's info
+    def build_categories(self, recipe_info):
+        # Clear Spinners if this page has been visited before
+        if len(self.ids.category_spinners.children) != 0:
+            self.ids.category_spinners.clear_widgets()
+            self.ids.category_labels.clear_widgets()
+        categories = sorted(self.controller.get_categories_list())
+        for cat in categories:
+            spinner = Spinner( text=recipe_info[cat], values=self.controller.get_category_values(cat))
+            spinner.size_hint = None, None
+            spinner.size = 130, 30
+            self.ids.category_spinners.add_widget(spinner)
+            self.spinners[cat] = spinner
+
+            cat_label = Label(text=cat, size_hint=(None, None), size=(100, 30))
+            self.ids.category_labels.add_widget(cat_label)
+
+
+
+            # Sets the current screen's text to show the input recipe's info
     # Used to open a recipe for editing
     def fill_recipe(self, recipe_info):
         if recipe_info == None:
@@ -247,16 +277,22 @@ class EditRecipeScreen(Screen):
             self.manager.last = "home"
             self.manager.current = "home"
             return
+
+        self.build_categories(recipe_info)
+
         self.recipe_id = recipe_info["name"]
         self.ids.name.text = recipe_info["name"]
         self.ids.ingredients.text = recipe_info["ingredients"]
         self.ids.instructions.text = recipe_info["instructions"]
-        self.ids.category.text = "Category: " + recipe_info["category"]
-        self.ids.meal.text = "Meal: " + recipe_info["meal"]
-        self.ids.ethnicity.text = "Ethnicity: " + recipe_info["ethnicity"]
-        self.ids.difficulty.text = "Difficulty: " + recipe_info["difficulty"]
-        self.ids.price.text = "Price: " + recipe_info["price"]
-        self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
+
+        # self.ids.category_labels.add
+
+        # self.ids.category.text = "Category: " + recipe_info["category"]
+        # self.ids.meal.text = "Meal: " + recipe_info["meal"]
+        # self.ids.ethnicity.text = "Ethnicity: " + recipe_info["ethnicity"]
+        # self.ids.difficulty.text = "Difficulty: " + recipe_info["difficulty"]
+        # self.ids.price.text = "Price: " + recipe_info["price"]
+        # self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
 
     # Set the screen's text to be an empty recipe
     def new_recipe(self):
@@ -273,16 +309,17 @@ class EditRecipeScreen(Screen):
 
     # Save the entered text, controller decides whether it is a new or existing recipe
     def save_recipe(self):
+        print(self.ids)
         new_info = {
             "name": self.ids.name.text,
             "ingredients": self.ids.ingredients.text,
             "instructions": self.ids.instructions.text,
-            "category": self.ids.category.text[10:],
-            "meal": self.ids.meal.text[6:],
-            "prep time": self.ids.prep.text[11:],
-            "difficulty": self.ids.difficulty.text[12:],
-            "price": self.ids.price.text[7:],
-            "ethnicity": self.ids.ethnicity.text[11:]}
+            "category": self.spinners["category"].text,
+            "meal": self.spinners["meal"].text,
+            "prep time": self.spinners["prep time"].text,
+            "difficulty": self.spinners["difficulty"].text,
+            "price": self.spinners["price"].text,
+            "ethnicity": self.spinners["ethnicity"].text}
 
         self.controller.save_recipe(self.recipe_id, new_info)
 

@@ -58,8 +58,11 @@ class Controller(EventDispatcher):
         return self.model.delete_recipe(recipe_name)
 
     # Return the lower level values of a specified upper level category
-    def get_category_list(self, upper_cat):
+    def get_category_values(self, upper_cat):
         return self.model.get_category_values(upper_cat)
+
+    def get_categories_list(self):
+        return self.model.get_categories_list()
 
 
 class Main:
