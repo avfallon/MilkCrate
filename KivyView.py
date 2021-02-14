@@ -12,6 +12,7 @@ from kivy.uix.screenmanager import ScreenManager, Screen
 from kivy.uix.screenmanager import NoTransition
 from kivy.uix.button import Button
 from kivy.uix.spinner import Spinner
+from kivy.core.window import Window
 from kivy.uix.dropdown import DropDown
 from kivy.uix.stacklayout import StackLayout
 
@@ -116,6 +117,32 @@ class SidebarButton(Button):
     opened = False
     upper_cat = ""
     pass
+
+
+class CategorySpinner(Spinner):
+    screen = ObjectProperty(None)
+    textbox = ObjectProperty(None)
+
+    def _on_dropdown_select(self, instance, data, *largs):
+        if data == "* Add new category *":
+            new_cat = TextInput(size_hint=(None, None))
+            new_cat.id = "new_cat_textedit"
+            new_cat.height = self.height
+            new_cat.width = self.width - 10
+            # new_cat.pos = instance.pos - self.pos
+            parent_window = new_cat.get_parent_window()
+            # new_cat.pos_hint = None, None;
+            # new_cat.pos = (parent_window[0] )
+            new_cat.pos = (instance.pos[0], instance.height+instance.pos[1])
+
+            self.screen.add_widget(new_cat)
+
+        else:
+            self.text = data
+            print("else")
+            self.is_open = False
+
+
 
 class HomeScreen(Screen):
     controller = ObjectProperty(None)
@@ -240,7 +267,6 @@ class RecipeViewScreen(Screen):
         self.manager.current = "home"
 
 
-
 class EditRecipeScreen(Screen):
     controller = ObjectProperty(None)
     app = ObjectProperty(None)
@@ -251,25 +277,37 @@ class EditRecipeScreen(Screen):
     # this is just a flag for deleting
     recipe_id = NEW_ID
 
+    # This creates the text boxes and Spinners for the categories (ethnicity, prep time,...)
     def build_categories(self, recipe_info):
         # Clear Spinners if this page has been visited before
         if len(self.ids.category_spinners.children) != 0:
             self.ids.category_spinners.clear_widgets()
             self.ids.category_labels.clear_widgets()
+
         categories = sorted(self.controller.get_categories_list())
         for cat in categories:
-            spinner = Spinner( text=recipe_info[cat], values=self.controller.get_category_values(cat))
+            # Gets the user-entered values for a certain high-level category
+            values = self.controller.get_category_values(cat)
+            if len(values) != 0:
+                values.append("* Add new category *")
+            else:
+                values = ["* Add new category *"]
+
+            # recipe_info would be none if this is a new recipe
+            if recipe_info:
+                spinner = CategorySpinner(text=recipe_info[cat], values=values)
+            else:
+                spinner = CategorySpinner(text="", values=values)
             spinner.size_hint = None, None
             spinner.size = 130, 30
+            spinner.screen = self
             self.ids.category_spinners.add_widget(spinner)
             self.spinners[cat] = spinner
 
             cat_label = Label(text=cat, size_hint=(None, None), size=(100, 30))
             self.ids.category_labels.add_widget(cat_label)
 
-
-
-            # Sets the current screen's text to show the input recipe's info
+    # Sets the current screen's text to show the input recipe's info
     # Used to open a recipe for editing
     def fill_recipe(self, recipe_info):
         if recipe_info == None:
@@ -297,15 +335,19 @@ class EditRecipeScreen(Screen):
     # Set the screen's text to be an empty recipe
     def new_recipe(self):
         self.recipe_id = self.NEW_ID
-        self.ids.name.text = ""
+        self.ids.name.text = "New Recipe"
         self.ids.ingredients.text = ""
         self.ids.instructions.text = ""
-        self.ids.category.text = "Category: "
-        self.ids.meal.text = "Meal: "
-        self.ids.ethnicity.text = "Ethnicity: "
-        self.ids.difficulty.text = "Difficulty: "
-        self.ids.price.text = "Price: "
-        self.ids.prep.text = "Prep Time: "
+        self.build_categories(None)
+        # self.ids.name.text = ""
+        # self.ids.ingredients.text = ""
+        # self.ids.instructions.text = ""
+        # self.ids.category.text = "Category: "
+        # self.ids.meal.text = "Meal: "
+        # self.ids.ethnicity.text = "Ethnicity: "
+        # self.ids.difficulty.text = "Difficulty: "
+        # self.ids.price.text = "Price: "
+        # self.ids.prep.text = "Prep Time: "
 
     # Save the entered text, controller decides whether it is a new or existing recipe
     def save_recipe(self):
