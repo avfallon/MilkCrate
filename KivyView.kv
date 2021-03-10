@@ -91,8 +91,7 @@
                 size: 50, 40
                 pos_hint: { "x": .04, "top": 1}
                 on_press:
-                    root.manager.transition = NoTransition()
-                    root.manager.current = "home"
+                    root.go_home()
 
             # Button to open an empty, editable recipe page
             Button:
@@ -154,6 +153,7 @@
                     text: "Category"
                     #index: sidebarLayout.children[id]
                     index: -2
+                    upper_cat: self.text.lower()
                     on_release:
                         if self.opened: root.dismiss_dropdown(self.text.lower(), self.index-1); self.opened = False
                         else: root.create_dropdown(self.text.lower(), self.index); self.opened = True
@@ -161,6 +161,7 @@
                 SidebarButton:
                     text: "Meal"
                     index: -3
+                    upper_cat: self.text.lower()
                     on_release:
                         if self.opened: root.dismiss_dropdown(self.text.lower(), self.index-1); self.opened = False
                         else: root.create_dropdown(self.text.lower(), self.index); self.opened = True
@@ -168,6 +169,7 @@
                 SidebarButton:
                     text: "Ethnicity"
                     index: -4
+                    upper_cat: self.text.lower()
                     on_release:
                         if self.opened: root.dismiss_dropdown(self.text.lower(), self.index-1); self.opened = False
                         else: root.create_dropdown(self.text.lower(), self.index); self.opened = True
@@ -175,6 +177,7 @@
                 SidebarButton:
                     text: "Difficulty"
                     index: -5
+                    upper_cat: self.text.lower()
                     on_release:
                         if self.opened: root.dismiss_dropdown(self.text.lower(), self.index-1); self.opened = False
                         else: root.create_dropdown(self.text.lower(), self.index); self.opened = True
@@ -182,6 +185,7 @@
                 SidebarButton:
                     text: "Price"
                     index: -6
+                    upper_cat: self.text.lower()
                     on_release:
                         if self.opened: root.dismiss_dropdown(self.text.lower(), self.index-1); self.opened = False
                         else: root.create_dropdown(self.text.lower(), self.index); self.opened = True
@@ -189,6 +193,7 @@
                 SidebarButton:
                     text: "Prep Time"
                     index: -7
+                    upper_cat: self.text.lower()
                     on_release:
                         if self.opened: root.dismiss_dropdown(self.text.lower(), self.index-1); self.opened = False
                         else: root.create_dropdown(self.text.lower(), self.index); self.opened = True
@@ -299,12 +304,12 @@
                         text: "Meal: "
 
                     CategoryLabel:
-                        id: price
-                        text: "Price: "
-
-                    CategoryLabel:
                         id: prep
                         text: "Prep Time: "
+
+                    CategoryLabel:
+                        id: price
+                        text: "Price: "
 
                 # Title label for ingredients section
                 Label:
@@ -357,6 +362,7 @@
                 size_hint: None, None
                 size: 1000, 500
                 pos_hint: {"x": 0, "top": 1}
+
 
                 # Back button, brings you back to the last screen you were at
                 Button:
@@ -438,7 +444,7 @@
                     hint_text: "ex: \n- 2 cups of milk\n- 1 stick of butter"
                     text: ""
                     size_hint: None, None
-                    size: 320, 400
+                    size: 320, 300
                     pos_hint: {"x": .01, "top": .45}
 
                 # Title label for instructions section
@@ -450,11 +456,20 @@
                     size: self.texture_size
                     pos_hint: {"x": .36, "top": .52}
 
-                # Hardcoded instructions section, this would be automatically generated
                 TextInput:
                     id: instructions
-                    hint_text: "ex:\n1) Boil Water\n2) Let it cool"
-                    text: ""
                     size_hint: None, None
-                    size: 350, 800
+                    width: 350
+                    height: max(self.minimum_height, 300)
                     pos_hint: {"x": .35, "top": .45}
+                    hint_text: "ex:\n1) Boil Water\n2) Let it cool"
+
+
+                # Hardcoded instructions section, this would be automatically generated
+            #                TextInput:
+            #                    id: instructions
+            #                    hint_text: "ex:\n1) Boil Water\n2) Let it cool"
+            #                    text: ""
+            #                    size_hint: None, None
+            #                    size: 350, 800
+            #                    pos_hint: {"x": .35, "top": .45}

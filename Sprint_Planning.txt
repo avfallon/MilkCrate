@@ -1,0 +1,28 @@
+Problem Statement: I need to create a stable, fully functional recipe program that runs locally on your computer.
+This program must be fully bootable from a single executable file that can be distributed.
+
+
+Requirements Backlog
+  - automatically install python/sql
+  - automatically create a local SQL database for the machine
+  - generate a .exe file that actually works
+  - Fix the spinners so it's always text boxes
+  - add an export feature (with an 'export all option')
+
+
+
+
+Sprint 0 (March):
+ - fix spinners so it doesn't save the "add new" thing
+ - implement search
+ - test/check the save function, sometimes it fails
+
+
+Sprint 1 (April):
+  - implement exporting recipes
+
+
+Sprint 2 (May):
+  - make python/sql automatically download
+  - make an executable file
+  - Distribute!

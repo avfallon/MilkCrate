@@ -122,22 +122,31 @@ class SidebarButton(Button):
 class CategorySpinner(Spinner):
     screen = ObjectProperty(None)
     textbox = ObjectProperty(None)
+    textbox_added = BooleanProperty(True)
+
 
     def _on_dropdown_select(self, instance, data, *largs):
         if data == "* Add new category *":
-            new_cat = TextInput(size_hint=(None, None))
-            new_cat.id = "new_cat_textedit"
-            new_cat.height = self.height
-            new_cat.width = self.width - 10
-            # new_cat.pos = instance.pos - self.pos
-            parent_window = new_cat.get_parent_window()
-            # new_cat.pos_hint = None, None;
-            # new_cat.pos = (parent_window[0] )
-            new_cat.pos = (instance.pos[0], instance.height+instance.pos[1])
+            # textbox = TextInput(size_hint=(None, None))
+            # textbox.id = "textedit"
+            # textbox.height = self.height
+            # textbox.width = self.width - 10
 
-            self.screen.add_widget(new_cat)
+            self.textbox.pos = (instance.pos[0], instance.height+instance.pos[1])
+
+            self.textbox.height = self.height
+            self.textbox.width = self.width - 15
+            if not self.textbox_added:
+                self.screen.add_widget(self.textbox)
+                self.textbox_added = True
 
         else:
+            # self.textbox.height = 0
+            # self.textbox.width = 0
+            if self.textbox_added:
+                self.screen.remove_widget(self.textbox)
+                self.textbox_added = False
+
             self.text = data
             print("else")
             self.is_open = False
@@ -152,6 +161,14 @@ class HomeScreen(Screen):
 
     # Sets the current screen to be the blank, opening home page, showing all recipes
     def go_home(self):
+        print(len(self.ids.sidebarLayout.children))
+        for btn in self.ids.sidebarLayout.children:
+            if btn.opened:
+                print("go home index: ", btn.index-1)
+                self.dismiss_dropdown(btn.text, btn.index-1)
+                btn.opened = False
+
+
         self.ids.title.text = "All Recipes"
         # Argument is just a flag that means display All Recipes
         self.rv.update_rec("","")
@@ -220,7 +237,9 @@ class HomeScreen(Screen):
     # input: the name of the upper level category whose dropdown will be closed, and its index
     #        in the sidebar
     def dismiss_dropdown(self, upper_cat, index):
+        print("Dismiss Dropdown index: ", index)
         cat_list = self.controller.get_category_values(upper_cat.lower())
+
         btn_count = 0
         for j in range(len(cat_list)):
             self.ids.sidebarLayout.remove_widget(self.ids.sidebarLayout.children[index])
@@ -230,6 +249,7 @@ class HomeScreen(Screen):
         for button in self.ids.sidebarLayout.children[:index+1]:
             button.index += btn_count
             #print(button.text, button.index)
+
 
 
 class RecipeViewScreen(Screen):
@@ -283,11 +303,19 @@ class EditRecipeScreen(Screen):
         if len(self.ids.category_spinners.children) != 0:
             self.ids.category_spinners.clear_widgets()
             self.ids.category_labels.clear_widgets()
+            self.spinners = {}
+            print("Clearing spinners")
 
         categories = sorted(self.controller.get_categories_list())
         for cat in categories:
             # Gets the user-entered values for a certain high-level category
             values = self.controller.get_category_values(cat)
+
+            # # This snippet deletes any extra "add new categories"
+            # for i in range(len(values)):
+            #     if values[i] == "* Add new category *":
+            #         values.remove(i)
+
             if len(values) != 0:
                 values.append("* Add new category *")
             else:
@@ -298,10 +326,16 @@ class EditRecipeScreen(Screen):
                 spinner = CategorySpinner(text=recipe_info[cat], values=values)
             else:
                 spinner = CategorySpinner(text="", values=values)
+
             spinner.size_hint = None, None
             spinner.size = 130, 30
             spinner.screen = self
+            textbox = TextInput(size_hint=(None, None))
+            textbox.size = 0, 0
+            spinner.textbox = textbox
+
             self.ids.category_spinners.add_widget(spinner)
+            self.add_widget(spinner.textbox)
             self.spinners[cat] = spinner
 
             cat_label = Label(text=cat, size_hint=(None, None), size=(100, 30))
@@ -323,14 +357,6 @@ class EditRecipeScreen(Screen):
         self.ids.ingredients.text = recipe_info["ingredients"]
         self.ids.instructions.text = recipe_info["instructions"]
 
-        # self.ids.category_labels.add
-
-        # self.ids.category.text = "Category: " + recipe_info["category"]
-        # self.ids.meal.text = "Meal: " + recipe_info["meal"]
-        # self.ids.ethnicity.text = "Ethnicity: " + recipe_info["ethnicity"]
-        # self.ids.difficulty.text = "Difficulty: " + recipe_info["difficulty"]
-        # self.ids.price.text = "Price: " + recipe_info["price"]
-        # self.ids.prep.text = "Prep Time: " + recipe_info["prep time"]
 
     # Set the screen's text to be an empty recipe
     def new_recipe(self):
@@ -339,15 +365,7 @@ class EditRecipeScreen(Screen):
         self.ids.ingredients.text = ""
         self.ids.instructions.text = ""
         self.build_categories(None)
-        # self.ids.name.text = ""
-        # self.ids.ingredients.text = ""
-        # self.ids.instructions.text = ""
-        # self.ids.category.text = "Category: "
-        # self.ids.meal.text = "Meal: "
-        # self.ids.ethnicity.text = "Ethnicity: "
-        # self.ids.difficulty.text = "Difficulty: "
-        # self.ids.price.text = "Price: "
-        # self.ids.prep.text = "Prep Time: "
+
 
     # Save the entered text, controller decides whether it is a new or existing recipe
     def save_recipe(self):
@@ -355,13 +373,16 @@ class EditRecipeScreen(Screen):
         new_info = {
             "name": self.ids.name.text,
             "ingredients": self.ids.ingredients.text,
-            "instructions": self.ids.instructions.text,
-            "category": self.spinners["category"].text,
-            "meal": self.spinners["meal"].text,
-            "prep time": self.spinners["prep time"].text,
-            "difficulty": self.spinners["difficulty"].text,
-            "price": self.spinners["price"].text,
-            "ethnicity": self.spinners["ethnicity"].text}
+            "instructions": self.ids.instructions.text }
+
+        # Saving category values
+        for cat in self.spinners.keys():
+            # Checks if a textbox for a new category has been created
+            if self.spinners[cat].textbox.height == 0:
+                new_info[cat] = self.spinners[cat].text
+            else:
+                new_info[cat] = self.spinners[cat].textbox.text
+
 
         self.controller.save_recipe(self.recipe_id, new_info)
 
@@ -373,6 +394,7 @@ class EditRecipeScreen(Screen):
         self.manager.transition = NoTransition()
         self.manager.last = self.manager.current
         self.manager.current = "recipeView"
+        self.clear_screen()
 
     # Delete the recipe currently being edited
     def delete_recipe(self):
@@ -388,11 +410,21 @@ class EditRecipeScreen(Screen):
             self.manager.last = "home"
             self.manager.current = "home"
 
+        self.clear_screen()
+
     # Functionality for back button '<', goes to the last screen before editing
     # Could be home for a new recipe, or the recipe screen if it is an edit of an existing recipe
     def go_back(self):
         print(self.manager.last)
         self.manager.current = self.manager.last
+        self.clear_screen()
+
+    def clear_screen(self):
+        for spinner in self.spinners.values():
+            self.remove_widget(spinner.textbox)
+
+
+
 
 
 # Wrapper class, this is what is actually running in that window
