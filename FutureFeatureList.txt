@@ -1,0 +1,4 @@
+ - .exe packagin for PC execution
+ - Swift IOS app
+ - image functionality
+ - recipe backup reading
